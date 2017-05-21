@@ -43,9 +43,9 @@
 						request.setAttribute("error", false);
 						}
 						%>
-						<table border=1 style="border-collapse: collapse">
+						<table style="border-collapse:collapse;" width="100%">
 				        <thead>
-				            <tr>
+				            <tr style="border:1px solid black;">
 				                <th>Category ID</th>
 				                <th>Category Name</th>
 				                <th>Description</th>
@@ -53,19 +53,19 @@
 				            </tr>
 				        </thead>
 				        <tbody>
-				        	<tr>
+				        	<tr style="border:1px solid black;">
 				        		<form action="CategoryController" method="post">
 				        			<input type="hidden" name="action" value="insert"/>
 									<td><input value="" name="id" readonly/></td>
 									<td><input value="" name="categoryName" required/></td>
 									<td><textArea value="" name="description" required></textArea></td>
-									<td><input type="submit" value="Insert"/></td>
+									<td colspan=2 align="center"><input type="submit" value="Insert"/></td>
 				        		</form>
 							</tr>
 							<% 	ArrayList<CategoryModel> categories = (ArrayList<CategoryModel>)request.getAttribute("categories");
 								for(CategoryModel category : categories) {
 							%>
-							<tr>
+							<tr style="border:1px solid black;">
 				        		<form action="CategoryController" method="post">
 				        			<input type="hidden" name="action" value="update"/>
 									<td><input value="<%= category.getId() %>" name="id" readonly/></td>
@@ -81,9 +81,11 @@
 						        			<input type="hidden" value="<%= category.getId() %>" name="id"/>
 						        			<td><input type="submit" value="Delete"/></td>
 						        		</form>
-						        <% } %>
+						        <% } else { %>
+						        <td></td>
 							</tr>
-							<% } %>
+							<%}
+				        		} %>
 				        </tbody>
 				    </table>
 					<% } else { %>

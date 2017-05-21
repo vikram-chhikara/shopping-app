@@ -12,11 +12,9 @@
 			response.sendRedirect("./index.html");
 		} else {		
 	%>
+		<h3>Hello <%= session.getAttribute( "personName" ) %></h3>
 		<table cellspacing = "5px"><tr>
 		<td valign="top"><jsp:include page="menu.jsp"></jsp:include></td>
-		<td>
-		<h1>Home</h1>
-		<h3>Hello <%= session.getAttribute( "personName" ) %></h3></td>
 		
 		</tr>
 		</table>
