@@ -20,3 +20,8 @@ SELECT * FROM category;
 SELECT * FROM product;
 SELECT * FROM shopping_cart;
 SELECT * FROM products_in_cart;
+
+-- Sales Analytics --
+SELECT p.person_name, pr.product_name
+FROM (person p JOIN shopping_cart cart ON p.id = cart.person_id)
+WHERE 
