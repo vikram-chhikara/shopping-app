@@ -29,7 +29,10 @@ public class SalesAnalyticsController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./salesAnalytics.jsp";
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
+
+		//check dropdown menu(s)
+		
+		
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
 	}
