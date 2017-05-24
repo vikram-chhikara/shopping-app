@@ -40,4 +40,13 @@ FROM person p, product pr, shopping_cart s, products_in_cart pi
 WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id
 ORDER BY p.person_name) t
 GROUP BY t.person_name
-ORDER BY Total DESC 
+ORDER BY Total DESC
+
+/*total by category*/
+SELECT t.category_id, SUM(t.price) AS Category_Sum
+FROM
+(SELECT p.person_name, pr.product_name, pr.category_id, pi.price
+FROM person p, product pr, shopping_cart s, products_in_cart pi
+WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id) t
+GROUP BY t.category_id
+ORDER BY Category_Sum desc
