@@ -51,14 +51,15 @@
 					<td>
 						<h3>Hello <%= session.getAttribute("personName") %></h3>
 						<form method="POST" action="SalesController">
-				   			Row: <select name="rowChoice" onchange="this.form.submit()">
+				   			Row: <select name="rowChoice">
 				  				<option value="c">Customers</option>
 				  				<option value="s" <%if((request.getAttribute("rowChoice") != null) && (request.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
 							</select>
-							Order: 	<select name="orderChoice" onchange="this.form.submit()">
+							Order: 	<select name="orderChoice">
 				  				<option value="a">Alphabetical</option>
 				  				<option value="t" <%if((request.getAttribute("orderChoice") != null) && (request.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
-							</select>			
+							</select>	
+							<input type="Submit" value="Get Table"></input>
 				  		</form>
 					</td>
 				</tr>
@@ -108,7 +109,6 @@
 					</tr>
 					<%
 				}
-				
 			%>
 			</table>	
 	<%

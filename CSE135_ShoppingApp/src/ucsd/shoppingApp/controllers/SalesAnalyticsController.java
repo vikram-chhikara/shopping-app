@@ -62,9 +62,12 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//get Table
 		System.out.println("Getting table");
-		if(sort.equals("a")) {
-			aList = aDB.getPersonTable();
-		} else {
+		if(sort.equals("a") && row.equals("c")) {
+			aList = aDB.getPersonAlphaTable();
+		} else if (sort.equals("a") && row.equals("s")) {
+			aList = aDB.getStateAlphaTable();
+		}
+		else {
 			aList = new ArrayList<AnalyticsModel>();
 		}
 		request.getSession().setAttribute("alist", aList);
@@ -72,7 +75,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		//Get row list 
 		ArrayList<String> rowList = new ArrayList<String>();
 		Connection conn = null;
-		if(row == null || row.equals("c")) {
+		if(row == null || row.equals("c") && sort.equals("a")) {
 			conn = ConnectionManager.getConnection();
 			PersonDAO pDB = new PersonDAO(conn);
 			
@@ -80,7 +83,7 @@ public class SalesAnalyticsController extends HttpServlet {
 				rowList = pDB.getPersonList();
 			}
 			catch(SQLException e) {
-				System.out.println("Customer Row names access failure");
+				System.out.println("Customer Row Alphabetical Sort access failure");
 			} finally {
 				if (conn != null) {
 	                try {
@@ -89,7 +92,25 @@ public class SalesAnalyticsController extends HttpServlet {
 	                conn = null;
 	            }
 			}
-		} else {
+		} else if(row.equals("c") && sort.equals("t")) {
+			conn = ConnectionManager.getConnection();
+			PersonDAO pDB = new PersonDAO(conn);
+			
+			try {
+				rowList = pDB.getPersonList();
+			}
+			catch(SQLException e) {
+				System.out.println("Customer Row Alphabetical Sort access failure");
+			} finally {
+				if (conn != null) {
+	                try {
+	                    conn.close();
+	                } catch (SQLException e) { } // Ignore
+	                conn = null;
+	            }
+			}
+		}
+		else {
 			rowList = aDB.getStateList();
 		}
 		request.getSession().setAttribute("rowList", rowList);
