@@ -16,10 +16,45 @@ public class PersonDAO {
 	private static final String INSERT_PERSON_SQL = "INSERT INTO PERSON(person_name, age, role_id, state_id) "
 			+ " VALUES(?, ?, ?, ?) ";
 	private static final String GET_PERSON_ROLE = "SELECT role_name FROM ROLE R, PERSON P WHERE P.person_name = ? AND P.role_id = R.id";
+	private static final String GET_PEOPLE = "SELECT person_name FROM person ORDER BY person_name";
+	
 	private Connection con = null;
 	
 	public PersonDAO(Connection con) {
 		this.con = con;
+	}
+	
+	/** Get valid people **/
+	public ArrayList<String> getPersonList() throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		ArrayList<String> result = new ArrayList<String>();
+		
+		try {
+			pstmt = con.prepareStatement(GET_PEOPLE);
+			
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getString("person_name"));
+			}
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			con.rollback();
+			throw e;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public boolean personExists(String username) {

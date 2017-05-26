@@ -35,6 +35,39 @@ public class ProductDAO {
 	public ProductDAO(Connection con) {
 		this.con = con;
 	}
+	
+	/** Get valid products **/
+	public ArrayList<String> getProductList() throws SQLException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		ArrayList<String> result = new ArrayList<String>();
+		
+		try {
+			pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL);
+			
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getString("product_name"));
+			}
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			con.rollback();
+			throw e;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	public int addProduct(String sku_id, String product_name, Double price, Integer category_id, String created_by)
 			throws SQLException {

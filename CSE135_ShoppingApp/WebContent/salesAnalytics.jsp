@@ -14,9 +14,35 @@
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
-			if(request.getAttribute("alist") == null) {
-				response.sendRedirect("./salesController?action=list");
+			ArrayList<AnalyticsModel> an;
+			if(session.getAttribute("alist") != null) {
+				System.out.println("not empty");
+				an = (ArrayList<AnalyticsModel>)session.getAttribute("alist");
 			} else {
+				System.out.println("null list");
+				an = new ArrayList<AnalyticsModel>();
+				//test
+				AnalyticsModel amy = new AnalyticsModel("name","test",5);
+				an.add(amy);
+			}
+			
+			//get Row Names
+			ArrayList<String> rowNames;
+			if(session.getAttribute("rowList") != null) {
+				rowNames = (ArrayList<String>)session.getAttribute("rowList");
+			} else {
+				System.out.println("Empty row list");
+				rowNames = new ArrayList<String>();
+			}
+			
+			//get Product Names
+			ArrayList<String> prodNames;
+			if(session.getAttribute("prodList") != null) {
+				prodNames = (ArrayList<String>)session.getAttribute("prodList");
+			} else {
+				System.out.println("Empty product list");
+				prodNames = new ArrayList<String>();
+			}
 	%>  		
 			<table cellspacing="5">
 				<tr>
@@ -38,31 +64,54 @@
 				</tr>
 			</table>
 			
-			<table>
-				<% ArrayList<AnalyticsModel> an = (ArrayList<AnalyticsModel>)request.getAttribute("alist");
-					int i = 0;
-					String prev = an.get(i).getRowName();
-					AnalyticsModel am = an.get(i);
+			<table style="border:1px solid black;" width="100%">
+				<tr style="border:1px solid black;" > <td></td>
+				<%
+				for(int i = 0; i < prodNames.size(); i++) {
 					%>
-					<tr> <td><%=prev %></td>
-					<td><%=am.getProduct() %></td>
+					<td><%=prodNames.get(i) %></td>
 					<%
-					for(i = 1 ; i < an.size(); i++) {
-						am = an.get(i);
-						if(!am.getRowName().equals(prev)) {
-							%>
-							</tr>
-							<tr>
-							<td><%=am.getRowName() %></td>
-							<%
-							prev = am.getRowName();
-						} 
+				}
+				%>
+				</tr>
+				<%
+				AnalyticsModel am;
+				String currRow = "";
+				int find = 0;
+				for(int i = 0; i < rowNames.size(); i++) {
+					currRow = rowNames.get(i);
 					%>
-						<td><%=am.getProduct() %></td>
-					<%} %>
+					<tr>
+					<td style="border:1px solid black;"><%=currRow %></td>
+					<% 
+						for(int j = 0; j < prodNames.size(); j++) {
+							for(int k = 0; k < an.size(); k++) {
+								am = an.get(k);
+								if(am.getRowName().equals(currRow) && am.getProduct().equals(prodNames.get(j))) {
+									%>
+									<td style="border:1px solid black;"><%=am.getPrice() %></td>
+									<%
+									find = 1;
+									break;
+								}
+							}
+
+							if(find == 1) {
+								find = 0;
+							} else {
+								%>
+									<td></td>
+								<%
+							}
+						}
+					%>
+					</tr>
+					<%
+				}
+				
+			%>
 			</table>	
 	<%
-			} 
 		}
 		else { %>
 			<h3>This page is available to owners only</h3>

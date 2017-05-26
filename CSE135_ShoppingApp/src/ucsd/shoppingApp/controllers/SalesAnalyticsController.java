@@ -2,6 +2,8 @@ package ucsd.shoppingApp.controllers;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -13,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ucsd.shoppingApp.ConnectionManager;
+import ucsd.shoppingApp.PersonDAO;
+import ucsd.shoppingApp.ProductDAO;
 import ucsd.shoppingApp.SalesDAO;
 import ucsd.shoppingApp.models.AnalyticsModel;
 
@@ -57,9 +61,56 @@ public class SalesAnalyticsController extends HttpServlet {
 		request.setAttribute("orderChoice", sort);
 		
 		//get Table
-		
-		aList = aDB.getPersonTable();
+		System.out.println("Getting table");
+		if(sort.equals("a")) {
+			aList = aDB.getPersonTable();
+		} else {
+			aList = new ArrayList<AnalyticsModel>();
+		}
 		request.getSession().setAttribute("alist", aList);
+		
+		//Get row list 
+		ArrayList<String> rowList = new ArrayList<String>();
+		Connection conn = null;
+		if(row == null || row.equals("c")) {
+			conn = ConnectionManager.getConnection();
+			PersonDAO pDB = new PersonDAO(conn);
+			
+			try {
+				rowList = pDB.getPersonList();
+			}
+			catch(SQLException e) {
+				System.out.println("Customer Row names access failure");
+			} finally {
+				if (conn != null) {
+	                try {
+	                    conn.close();
+	                } catch (SQLException e) { } // Ignore
+	                conn = null;
+	            }
+			}
+		} else {
+			rowList = aDB.getStateList();
+		}
+		request.getSession().setAttribute("rowList", rowList);
+
+		//and product list
+		try {
+			conn = ConnectionManager.getConnection();
+			ProductDAO prodDB = new ProductDAO(conn);
+			rowList = prodDB.getProductList();
+			request.getSession().setAttribute("prodList", rowList);
+		}
+		catch(SQLException e) {
+			System.out.println("Product Column names access failure");
+		} finally {
+			if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) { } // Ignore
+                conn = null;
+            }
+		}
 		
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
