@@ -26,21 +26,24 @@ price REAL NOT NULL CHECK(price >= 0.0)
 
 INSERT INTO Purchase_Precomputed(SELECT p.person_name, pr.product_name, pi.price
 FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id
+WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id
 ORDER BY p.person_name);
 
 /*Simple Query; gives customers and their purchased products and price*/
 SELECT p.person_name, pr.product_name, pi.price
-FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id
-ORDER BY p.person_name
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
+ORDER BY p.person_name;
+
+/*Simple Query with Joins*/
+SELECT p.person_name, pr.product_name, pi.price
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
+ORDER BY p.person_name;
 
 /*Better query than before; gives quantity of each product*/
 SELECT t.person_name, t.product_name, t.price, COUNT(t.product_name) AS Quanatity
 FROM
 (SELECT p.person_name, pr.product_name, pi.price
-FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
 ORDER BY p.person_name) t
 GROUP BY t.person_name, t.product_name, t.price
 ORDER BY t.person_name
@@ -55,8 +58,7 @@ ORDER BY t.person_name
 SELECT t.person_name, SUM(t.price) AS Total
 FROM
 (SELECT p.person_name, pr.product_name, pi.price
-FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
 ORDER BY p.person_name) t
 GROUP BY t.person_name
 ORDER BY Total DESC
@@ -71,8 +73,8 @@ ORDER BY Total DESC
 SELECT t.category_id, SUM(t.price) AS Category_Sum
 FROM
 (SELECT p.person_name, pr.product_name, pr.category_id, pi.price
-FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id) t
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
+ORDER BY p.person_name) t
 GROUP BY t.category_id
 ORDER BY Category_Sum desc
 
