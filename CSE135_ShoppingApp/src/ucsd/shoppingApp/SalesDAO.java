@@ -12,8 +12,8 @@ import ucsd.shoppingApp.models.AnalyticsModel;
 public class SalesDAO {
 	private static String GET_STATES = "SELECT state_name FROM state ORDER BY state_name";
 	private static String GET_CUST_PRODS = "SELECT p.person_name, pr.product_name, pi.price "
-			+ "FROM person p, product pr, shopping_cart s, products_in_cart pi "
-			+ "WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id "
+			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
 			+ "ORDER BY p.person_name";
 	private static String GET_STATE_PRODS = "SELECT s.state_name,pr.product_name, SUM(pr.price) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
@@ -37,12 +37,19 @@ public class SalesDAO {
 		ArrayList<String> table = new ArrayList<String>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		
+		String elem = "";
+		
 		try {
 			pstmt = con.prepareStatement(GET_STATES);
 			
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				table.add(rs.getString("state_name"));
+				elem = rs.getString("state_name");
+				if (elem == null) {
+					elem = "";
+				}
+				table.add(elem);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -65,14 +72,31 @@ public class SalesDAO {
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		
+		String row = "";
+		String prod = "";
+		Double pri = 0.0;
+		
 		try {
 			pstmt = con.prepareStatement(GET_CUST_PRODS);
-			//pstmt.setString(1, "blah");
 			
 			rs = pstmt.executeQuery();
+			
 			while (rs.next()) {
-				AnalyticsModel a = new AnalyticsModel(rs.getString("person_name"),rs.getString("product_name"),rs.getDouble("price"));
+				row = rs.getString("person_name");
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				
+				if(prod == null) {
+					prod = "";
+				}
+				if(pri == null) {
+					pri = 0.0;
+				}
+				
+				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);
+
 				System.out.println(a.getRowName());
 			}
 		} catch (Exception e) {
@@ -140,17 +164,33 @@ public class SalesDAO {
 		return table;
 	}
 	
-	public ArrayList<String> getPersonTopTable() {
-		ArrayList<String> table = new ArrayList<String>();
+	public ArrayList<AnalyticsModel> getPersonTopTable() {
+		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		
+		String row = "";
+		String prod = "";
+		Double pri = 0.0;
+		
 		try {
 			pstmt = con.prepareStatement(GET_TOP_CUST_PRODS);
 			
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
-				AnalyticsModel a = new AnalyticsModel(rs.getString("person_name"),rs.getString("product_name"),rs.getDouble("price"));
-				table.add("no");
+				row = rs.getString("person_name");
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				
+				if(prod == null) {
+					prod = "";
+				}
+				if(pri == null) {
+					pri = 0.0;
+				}
+				
+				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
+				table.add(a);
 				System.out.println(a.getRowName());
 			}
 		} catch (Exception e) {
