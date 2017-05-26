@@ -13,7 +13,7 @@ public class SalesDAO {
 	private static String GET_STATES = "SELECT state_name FROM state ORDER BY state_name";
 	private static String GET_CUST_PRODS = "SELECT p.person_name, pr.product_name, pi.price "
 			+ "FROM person p, product pr, shopping_cart s, products_in_cart pi "
-			+ "WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id "
+			+ "WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id "
 			+ "ORDER BY p.person_name";
 	private static String GET_STATE_PRODS = "SELECT s.state_name,pr.product_name, SUM(pr.price) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
