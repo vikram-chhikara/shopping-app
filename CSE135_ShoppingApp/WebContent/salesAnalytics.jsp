@@ -27,12 +27,12 @@
 			}
 			
 			//get Row Names
-			ArrayList<String> rowNames;
+			ArrayList<AnalyticsModel> rowNames;
 			if(session.getAttribute("rowList") != null) {
-				rowNames = (ArrayList<String>)session.getAttribute("rowList");
+				rowNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
 			} else {
 				System.out.println("Empty row list");
-				rowNames = new ArrayList<String>();
+				rowNames = new ArrayList<AnalyticsModel>();
 			}
 			
 			//get Product Names
@@ -74,16 +74,19 @@
 					<%
 				}
 				%>
-				</tr>
 				<%
 				AnalyticsModel am;
 				String currRow = "";
+				String rowVal = "(0.0)";
 				int find = 0;
+				
 				for(int i = 0; i < rowNames.size(); i++) {
-					currRow = rowNames.get(i);
+					currRow = rowNames.get(i).getRowName();
+					System.out.println("table output: " + i + " is " + currRow);
+					rowVal = currRow + "\n (" + rowNames.get(i).getPrice() + ")";
 					%>
 					<tr>
-					<td style="border:1px solid black;"><%=currRow %></td>
+					<td style="border:1px solid black;"><%=rowVal %></td>
 					<% 
 						for(int j = 0; j < prodNames.size(); j++) {
 							for(int k = 0; k < an.size(); k++) {

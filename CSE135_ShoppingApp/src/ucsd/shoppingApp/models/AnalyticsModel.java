@@ -37,4 +37,21 @@ public class AnalyticsModel {
 	public void setPrice(double price) {
 		this.price = price;
 	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		//If the compared object is null, the two are not the same
+		if(o == null)
+			return false;
+		
+		//Checks if object is correct
+		if(o instanceof AnalyticsModel) {
+			//Check if values are correct
+			if(this.getRowName().equals(((AnalyticsModel)o).getRowName()) && this.getProduct().equals(((AnalyticsModel)o).getProduct()))
+				return true;
+		}
+		
+		return false;
+	}
 }

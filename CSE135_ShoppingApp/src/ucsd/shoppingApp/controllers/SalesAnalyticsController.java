@@ -73,54 +73,22 @@ public class SalesAnalyticsController extends HttpServlet {
 		request.getSession().setAttribute("alist", aList);
 		
 		//Get row list 
-		ArrayList<String> rowList = new ArrayList<String>();
+		ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
 		Connection conn = null;
-		if(row == null || row.equals("c") && sort.equals("a")) {
-			conn = ConnectionManager.getConnection();
-			PersonDAO pDB = new PersonDAO(conn);
-			
-			try {
-				rowList = pDB.getPersonList();
-			}
-			catch(SQLException e) {
-				System.out.println("Customer Row Alphabetical Sort access failure");
-			} finally {
-				if (conn != null) {
-	                try {
-	                    conn.close();
-	                } catch (SQLException e) { } // Ignore
-	                conn = null;
-	            }
-			}
-		} else if(row.equals("c") && sort.equals("t")) {
-			conn = ConnectionManager.getConnection();
-			PersonDAO pDB = new PersonDAO(conn);
-			
-			try {
-				rowList = pDB.getPersonList();
-			}
-			catch(SQLException e) {
-				System.out.println("Customer Row Alphabetical Sort access failure");
-			} finally {
-				if (conn != null) {
-	                try {
-	                    conn.close();
-	                } catch (SQLException e) { } // Ignore
-	                conn = null;
-	            }
-			}
-		}
-		else {
+		if(row == null || row.equals("c")) {
+			rowList = aDB.getPersonList(sort);
+		} else {
 			rowList = aDB.getStateList();
 		}
 		request.getSession().setAttribute("rowList", rowList);
 
 		//and product list
+		ArrayList<String> colList = new ArrayList<String>();
 		try {
 			conn = ConnectionManager.getConnection();
 			ProductDAO prodDB = new ProductDAO(conn);
-			rowList = prodDB.getProductList();
-			request.getSession().setAttribute("prodList", rowList);
+			colList = prodDB.getProductList();
+			request.getSession().setAttribute("prodList", colList);
 		}
 		catch(SQLException e) {
 			System.out.println("Product Column names access failure");
