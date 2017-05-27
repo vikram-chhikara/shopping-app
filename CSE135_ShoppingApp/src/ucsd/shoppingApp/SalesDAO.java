@@ -28,21 +28,17 @@ public class SalesDAO {
 			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) "
 			+ "on s.id = pi.cart_id) AS t "
 			+ "GROUP BY t.person_name ORDER BY price DESC";
+	
+	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.person_name, pr.product_name, pi.price "
-			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
-			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
+			+ "FROM (person p JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
 			+ "ORDER BY p.person_name";
 	private static String GET_STATE_PRODS = "SELECT s.state_name,pr.product_name, SUM(pr.price) AS price "
 			+ "FROM (state s JOIN person p ON p.state_id = s.id) JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = sc.person_id "
 			+ "GROUP BY s.state_name, pr.product_name ORDER BY s.state_name";
-	private static String GET_TOP_CUST_PRODS = "SELECT t.person_name, SUM(t.price) AS Total "
-			+ "FROM (SELECT p.person_name, pr.product_name, pi.price "
-			+ "FROM person p, product pr, shopping_cart s, products_in_cart pi "
-			+ "WHERE p.id = s.id and s.id = pi.cart_id and pr.id = pi.product_id "
-			+ "ORDER BY p.person_name) t GROUP BY t.person_name ORDER BY Total DESC "
-			+ "LIMIT 20";
 	
 	private Connection con;
 
@@ -50,6 +46,7 @@ public class SalesDAO {
 		this.con = con;
 	}
 
+	/** List of states for row ordering */
 	public ArrayList<AnalyticsModel> getStateList() {
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
@@ -91,6 +88,7 @@ public class SalesDAO {
 		return table;
 	}
 	
+	/** List of customers for row ordering */
 	public ArrayList<AnalyticsModel> getPersonList(String o) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -123,6 +121,21 @@ public class SalesDAO {
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				result.add(a);
+			}
+			
+			//move null to bottom if top-k sorting
+			if(o.equals("t")) {
+				AnalyticsModel aMove;
+				int r_size = result.size();
+				for(int amove = 0; amove < r_size; amove++) {
+					aMove = result.get(amove);
+					if(aMove.getPrice() != 0.0) {
+						break;
+					}
+					result.remove(amove);
+					result.add(aMove);
+					amove--;
+				}
 			}
 			return result;
 		} catch (SQLException e) {
@@ -243,62 +256,4 @@ public class SalesDAO {
 		}
 		return table;
 	}
-	
-	public ArrayList<AnalyticsModel> getPersonTopTable() {
-		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		String row = "";
-		String prod = "";
-		Double pri = 0.0;
-		
-		try {
-			pstmt = con.prepareStatement(GET_TOP_CUST_PRODS);
-			
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				row = rs.getString("person_name");
-				prod = rs.getString("product_name");
-				pri = rs.getDouble("price");
-				
-				if(prod == null) {
-					prod = "";
-				}
-				if(pri == null) {
-					pri = 0.0;
-				}
-				
-				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
-				table.add(a);
-				System.out.println(a.getRowName());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return table;
-	}
-	
-	/*
-	private ArrayList<AnalyticsModel> cleanTable(ArrayList<AnalyticsModel> a) {
-		ArrayList<AnalyticsModel> retT = new ArrayList<AnalyticsModel>();
-		int i = 0;
-		
-		String prev = (a.get(i)).getRowName();
-		
-		
-		
-		return retT;
-	}*/
 }

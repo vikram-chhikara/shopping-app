@@ -11,7 +11,7 @@ import ucsd.shoppingApp.models.ProductModel;
 import ucsd.shoppingApp.models.ProductModelExtended;
 
 public class ProductDAO {
-	private static final String SELECT_ALL_PRODUCT_SQL = "SELECT * FROM PRODUCT";
+	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT * FROM PRODUCT ORDER BY product_name";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
@@ -43,7 +43,7 @@ public class ProductDAO {
 		ArrayList<String> result = new ArrayList<String>();
 		
 		try {
-			pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL);
+			pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
 			
 			rs = pstmt.executeQuery();
 

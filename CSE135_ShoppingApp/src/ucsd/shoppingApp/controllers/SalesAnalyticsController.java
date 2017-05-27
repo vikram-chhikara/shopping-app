@@ -62,9 +62,9 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//get Table
 		System.out.println("Getting table");
-		if(sort.equals("a") && row.equals("c")) {
+		if(row.equals("c")) {
 			aList = aDB.getPersonAlphaTable();
-		} else if (sort.equals("a") && row.equals("s")) {
+		} else if (row.equals("s")) {
 			aList = aDB.getStateAlphaTable();
 		}
 		else {

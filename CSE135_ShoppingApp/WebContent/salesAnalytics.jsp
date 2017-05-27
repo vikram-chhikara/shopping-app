@@ -16,7 +16,6 @@
 		if("owner".equalsIgnoreCase(role) == true){
 			ArrayList<AnalyticsModel> an;
 			if(session.getAttribute("alist") != null) {
-				System.out.println("not empty");
 				an = (ArrayList<AnalyticsModel>)session.getAttribute("alist");
 			} else {
 				System.out.println("null list");
@@ -82,7 +81,6 @@
 				
 				for(int i = 0; i < rowNames.size(); i++) {
 					currRow = rowNames.get(i).getRowName();
-					System.out.println("table output: " + i + " is " + currRow);
 					rowVal = currRow + "\n (" + rowNames.get(i).getPrice() + ")";
 					%>
 					<tr>
