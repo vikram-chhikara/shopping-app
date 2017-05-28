@@ -12,17 +12,17 @@ import ucsd.shoppingApp.models.AnalyticsModel;
 public class SalesDAO {
 	/* Get row names */
 	private static String GET_STATES_ALPHA = "SELECT tot.state_name, SUM(tot.price) AS price "
-			+ "FROM (SELECT s.state_name, (pr.price * quantity) AS price "
+			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name ORDER BY tot.state_name";
 	private static String GET_STATES_TOP = "SELECT tot.state_name, SUM(tot.price) AS price "
-			+ "FROM (SELECT s.state_name, (pr.price * quantity) AS price "
+			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY price DESC";
+			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT ? OFFSET ?";
 	private static final String GET_PEOPLE_ALPHA = "SELECT t.person_name, SUM(t.price) AS price "
 			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
 			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
@@ -67,6 +67,10 @@ public class SalesDAO {
 		try {
 			if(o.equals("t")) {
 				pstmt = con.prepareStatement(GET_STATES_TOP);
+				pstmt.setInt(1, 20);
+				pstmt.setInt(2, 0);
+				
+				System.out.println(pstmt);
 			} else {
 				pstmt = con.prepareStatement(GET_STATES_ALPHA);
 			}
@@ -236,8 +240,6 @@ public class SalesDAO {
 				if(pri == null) {
 					pri = 0.0;
 				}
-				
-				//Check table
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);

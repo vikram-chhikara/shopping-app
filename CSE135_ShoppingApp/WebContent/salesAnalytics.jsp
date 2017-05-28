@@ -68,7 +68,7 @@
 			  				<option value="a">Alphabetical</option>
 			  				<option value="t" <%if((request.getAttribute("orderChoice") != null) && (request.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
 						</select>
-						<input type="Submit" value="Get Table"></input> </p>
+						<input type="Submit" value="Run Query"></input> </p>
 						<!-- Sales Filtering Options -->
 						Category Filter: <select name="catFilter">
 							<option value="0">All</option>
@@ -94,7 +94,7 @@
 				<%
 				for(int i = 0; i < prodNames.size(); i++) {
 					%>
-					<td style="border:1px solid black;"><%=prodNames.get(i) %></td>
+					<td style="border:1px solid black; font-weight:bold"><%=prodNames.get(i) %></td>
 					<%
 				}
 				%>
@@ -109,7 +109,7 @@
 					rowVal = currRow + "\n (" + rowNames.get(i).getPrice() + ")";
 					%>
 					<tr>
-					<td style="border:1px solid black;"><%=rowVal %></td>
+					<td style="border:1px solid black; font-weight:bold"><%=rowVal %></td>
 					<% 
 						for(int j = 0; j < prodNames.size(); j++) {
 							for(int k = 0; k < an.size(); k++) {
