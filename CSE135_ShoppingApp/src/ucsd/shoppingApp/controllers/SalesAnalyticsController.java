@@ -65,9 +65,9 @@ public class SalesAnalyticsController extends HttpServlet {
 		//get Table
 		System.out.println("Getting table");
 		if(row.equals("c")) {
-			aList = aDB.getPersonAlphaTable();
+			aList = aDB.getPersonTable();
 		} else if (row.equals("s")) {
-			aList = aDB.getStateAlphaTable();
+			aList = aDB.getStateTable();
 		}
 		else {
 			aList = new ArrayList<AnalyticsModel>();

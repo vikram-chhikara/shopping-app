@@ -46,7 +46,7 @@ public class SalesDAO {
 			+ "FROM (state s JOIN person p ON p.state_id = s.id) JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name, product_name ORDER BY tot.state_name";
+			+ "GROUP BY tot.state_name, product_name";
 	
 	private Connection con;
 
@@ -79,10 +79,6 @@ public class SalesDAO {
 			while (rs.next()) {
 				row = rs.getString("state_name");
 				pri = rs.getDouble("price");
-				
-				if(pri == null) {
-					pri = 0.0;
-				}
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);
@@ -168,7 +164,7 @@ public class SalesDAO {
 	}
 	
 	/** List people and associated prices per product */
-	public ArrayList<AnalyticsModel> getPersonAlphaTable() {
+	public ArrayList<AnalyticsModel> getPersonTable() {
 		//HashMap<String, ArrayList<AnalyticsModel>>
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
@@ -216,7 +212,7 @@ public class SalesDAO {
 	}
 	
 	/** List states and full purchases per product */
-	public ArrayList<AnalyticsModel> getStateAlphaTable() {
+	public ArrayList<AnalyticsModel> getStateTable() {
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -236,9 +232,6 @@ public class SalesDAO {
 				
 				if(prod == null) {
 					prod = "";
-				}
-				if(pri == null) {
-					pri = 0.0;
 				}
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
