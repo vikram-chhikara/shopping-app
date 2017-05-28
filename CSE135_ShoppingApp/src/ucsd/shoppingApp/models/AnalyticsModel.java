@@ -37,7 +37,7 @@ public class AnalyticsModel {
 	public void setPrice(double price) {
 		this.price = price;
 	}
-	
+
 	@Override
 	public boolean equals(Object o)
 	{

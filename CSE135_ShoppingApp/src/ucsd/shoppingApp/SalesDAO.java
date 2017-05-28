@@ -11,11 +11,12 @@ import ucsd.shoppingApp.models.AnalyticsModel;
 
 public class SalesDAO {
 	/* Get row names */
-	private static String GET_STATES_ALPHA = "SELECT s.state_name, SUM(pr.price) AS price "
+	private static String GET_STATES_ALPHA = "SELECT tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.state_name, (pr.price * quantity) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
-			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = sc.person_id "
-			+ "GROUP BY s.state_name ORDER BY s.state_name";
+			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
+			+ "GROUP BY tot.state_name ORDER BY tot.state_name";
 	private static final String GET_PEOPLE_ALPHA = "SELECT t.person_name, SUM(t.price) AS price "
 			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
 			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
@@ -160,6 +161,7 @@ public class SalesDAO {
 		return result;
 	}
 	
+	/** List people and associated prices per product */
 	public ArrayList<AnalyticsModel> getPersonAlphaTable() {
 		//HashMap<String, ArrayList<AnalyticsModel>>
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
