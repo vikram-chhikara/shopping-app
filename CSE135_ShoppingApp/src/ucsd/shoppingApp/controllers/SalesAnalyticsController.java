@@ -59,6 +59,8 @@ public class SalesAnalyticsController extends HttpServlet {
 		request.setAttribute("rowChoice", row);
 		String sort = request.getParameter("orderChoice");
 		request.setAttribute("orderChoice", sort);
+		int cat = Integer.parseInt(request.getParameter("catFilter"));
+		request.setAttribute("catFilter", cat);
 		
 		//get Table
 		System.out.println("Getting table");

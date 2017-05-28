@@ -42,27 +42,51 @@
 				System.out.println("Empty product list");
 				prodNames = new ArrayList<String>();
 			}
-	%>  		
-			<table cellspacing="5">
-				<tr>
-					<td valign="top"> <jsp:include page="./menu.jsp"></jsp:include></td>
-					<td></td>
-					<td>
-						<h3>Hello <%= session.getAttribute("personName") %></h3>
-						<form method="POST" action="SalesController">
-				   			Row: <select name="rowChoice">
-				  				<option value="c">Customers</option>
-				  				<option value="s" <%if((request.getAttribute("rowChoice") != null) && (request.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
-							</select>
-							Order: 	<select name="orderChoice">
-				  				<option value="a">Alphabetical</option>
-				  				<option value="t" <%if((request.getAttribute("orderChoice") != null) && (request.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
-							</select>	
-							<input type="Submit" value="Get Table"></input>
-				  		</form>
-					</td>
-				</tr>
-			</table>
+	%> 
+	<!-- Sales Filtering Category List -->
+	<%
+		Connection con = ConnectionManager.getConnection();	
+		CategoryDAO categoryDao = new CategoryDAO(con);
+		List<CategoryModel> category_list = categoryDao.getCategories();
+		con.close();
+	%>
+	
+	<!-- Basic Filtering -->
+		<table cellspacing="5">
+			<tr>
+				<td valign="top"> <jsp:include page="./menu.jsp"></jsp:include></td>
+				<td></td>
+				<td>
+					<h3>Hello <%= session.getAttribute("personName") %></h3>
+					<form method="POST" action="SalesController">
+					<p>
+			   			Row: <select name="rowChoice">
+			  				<option value="c">Customers</option>
+			  				<option value="s" <%if((request.getAttribute("rowChoice") != null) && (request.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
+						</select>
+						Order: 	<select name="orderChoice">
+			  				<option value="a">Alphabetical</option>
+			  				<option value="t" <%if((request.getAttribute("orderChoice") != null) && (request.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
+						</select>
+						<input type="Submit" value="Get Table"></input> </p>
+						<!-- Sales Filtering Options -->
+						Category Filter: <select name="catFilter">
+							<option value="0">All</option>
+							<%
+							for (CategoryModel cat : category_list) {
+							%>
+							<option value="<%=cat.getId()%>" <%if((request.getAttribute("catFilter") != null) && ((Integer)request.getAttribute("catFilter") == cat.getId())) { %> selected="selected" <%} %>> 
+								<%=cat.getCategoryName()%>
+							</option>
+							<%
+							}
+							%>
+						</select>
+			  		</form>
+				</td>
+			</tr>
+			
+		</table>
 			
 			<!-- Table ordered and sorted as required -->
 			<table style="border-collapse:collapse;" width="100%">

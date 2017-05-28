@@ -41,11 +41,12 @@ public class SalesDAO {
 			+ "FROM (person p JOIN shopping_cart s on  p.id = s.person_id) "
 			+ "JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
 			+ "ORDER BY p.person_name";
-	private static String GET_STATE_PRODS = "SELECT s.state_name,pr.product_name, SUM(pr.price) AS price "
+	private static String GET_STATE_PRODS = "SELECT tot.state_name, product_name, SUM(tot.price) as price "
+			+ "FROM (SELECT s.state_name, pr.product_name, (pr.price * quantity) AS price "
 			+ "FROM (state s JOIN person p ON p.state_id = s.id) JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
-			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = sc.person_id "
-			+ "GROUP BY s.state_name, pr.product_name ORDER BY s.state_name";
+			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
+			+ "GROUP BY tot.state_name, product_name ORDER BY tot.state_name";
 	
 	private Connection con;
 
@@ -210,6 +211,7 @@ public class SalesDAO {
 		return table;
 	}
 	
+	/** List states and full purchases per product */
 	public ArrayList<AnalyticsModel> getStateAlphaTable() {
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
