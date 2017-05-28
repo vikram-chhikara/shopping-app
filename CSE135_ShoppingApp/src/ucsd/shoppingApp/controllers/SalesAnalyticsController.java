@@ -78,7 +78,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		if(row == null || row.equals("c")) {
 			rowList = aDB.getPersonList(sort);
 		} else {
-			rowList = aDB.getStateList();
+			rowList = aDB.getStateList(sort);
 		}
 		request.getSession().setAttribute("rowList", rowList);
 

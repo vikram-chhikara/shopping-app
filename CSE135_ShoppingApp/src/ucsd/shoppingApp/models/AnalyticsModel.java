@@ -1,5 +1,7 @@
 package ucsd.shoppingApp.models;
 
+import java.util.ArrayList;
+
 public class AnalyticsModel {
 	private String rowName;
 	private String product;
@@ -36,6 +38,23 @@ public class AnalyticsModel {
 
 	public void setPrice(double price) {
 		this.price = price;
+	}
+	
+	public static ArrayList<AnalyticsModel> moveNull(ArrayList<AnalyticsModel> am) {
+		AnalyticsModel aMove;
+		
+		int r_size = am.size();
+		for(int amove = 0; amove < r_size; amove++) {
+			aMove = am.get(amove);
+			if(aMove.getPrice() != 0.0) {
+				break;
+			}
+			am.remove(amove);
+			am.add(aMove);
+			amove--;
+		}
+		
+		return am;
 	}
 
 	@Override

@@ -65,12 +65,12 @@
 			</table>
 			
 			<!-- Table ordered and sorted as required -->
-			<table style="border:1px solid black;" width="100%">
+			<table style="border-collapse:collapse;" width="100%">
 				<tr style="border:1px solid black;" > <td></td>
 				<%
 				for(int i = 0; i < prodNames.size(); i++) {
 					%>
-					<td><%=prodNames.get(i) %></td>
+					<td style="border:1px solid black;"><%=prodNames.get(i) %></td>
 					<%
 				}
 				%>
@@ -103,7 +103,7 @@
 								find = 0;
 							} else {
 								%>
-									<td></td>
+									<td style="border:1px solid black;"></td>
 								<%
 							}
 						}

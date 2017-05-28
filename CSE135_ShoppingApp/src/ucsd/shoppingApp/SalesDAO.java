@@ -17,6 +17,12 @@ public class SalesDAO {
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name ORDER BY tot.state_name";
+	private static String GET_STATES_TOP = "SELECT tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.state_name, (pr.price * quantity) AS price "
+			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
+			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
+			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
+			+ "GROUP BY tot.state_name ORDER BY price DESC";
 	private static final String GET_PEOPLE_ALPHA = "SELECT t.person_name, SUM(t.price) AS price "
 			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
 			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
@@ -48,7 +54,7 @@ public class SalesDAO {
 	}
 
 	/** List of states for row ordering */
-	public ArrayList<AnalyticsModel> getStateList() {
+	public ArrayList<AnalyticsModel> getStateList(String o) {
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -58,7 +64,11 @@ public class SalesDAO {
 		Double pri = 0.0;
 		
 		try {
-			pstmt = con.prepareStatement(GET_STATES_ALPHA);
+			if(o.equals("t")) {
+				pstmt = con.prepareStatement(GET_STATES_TOP);
+			} else {
+				pstmt = con.prepareStatement(GET_STATES_ALPHA);
+			}
 			
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
@@ -71,6 +81,11 @@ public class SalesDAO {
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);
+			}
+			
+			//move null to bottom if top-k sorting
+			if(o.equals("t")) {
+				table = AnalyticsModel.moveNull(table);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -94,7 +109,6 @@ public class SalesDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
-		System.out.println("Fresh modeL: " + o);
 		
 		String row = "";
 		String prod = "";
@@ -107,13 +121,10 @@ public class SalesDAO {
 				pstmt = con.prepareStatement(GET_PEOPLE_ALPHA);
 			}
 			
-			System.out.println(pstmt);
-			
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
 				row = rs.getString("person_name");
-				System.out.println("getting row: " + row);
 				pri = rs.getDouble("price");
 				
 				if(pri == null) {
@@ -126,17 +137,7 @@ public class SalesDAO {
 			
 			//move null to bottom if top-k sorting
 			if(o.equals("t")) {
-				AnalyticsModel aMove;
-				int r_size = result.size();
-				for(int amove = 0; amove < r_size; amove++) {
-					aMove = result.get(amove);
-					if(aMove.getPrice() != 0.0) {
-						break;
-					}
-					result.remove(amove);
-					result.add(aMove);
-					amove--;
-				}
+				result = AnalyticsModel.moveNull(result);
 			}
 			return result;
 		} catch (SQLException e) {
@@ -191,8 +192,6 @@ public class SalesDAO {
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);
-
-				System.out.println(a.getRowName());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -240,7 +239,6 @@ public class SalesDAO {
 				
 				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
 				table.add(a);
-				System.out.println(a.getRowName());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
