@@ -22,7 +22,7 @@
 				<td valign="top"><jsp:include page="./menu.jsp"></jsp:include></td>
 				<td></td>
 				<td>
-					<h3>Hello <%= session.getAttribute("personName") %></h3>
+					<h3>Hello <%=session.getAttribute("personName")%></h3>
 					<h3>Categories List</h3>
 					<% Connection con = ConnectionManager.getConnection(); 
 						CategoryDAO categoryDao = new CategoryDAO(con);

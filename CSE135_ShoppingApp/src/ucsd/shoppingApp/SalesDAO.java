@@ -23,24 +23,22 @@ public class SalesDAO {
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 20 OFFSET ?";
-	private static final String GET_PEOPLE_ALPHA = "SELECT t.person_name, SUM(t.price) AS price "
-			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
-			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
-			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) "
-			+ "on s.id = pi.cart_id) AS t "
-			+ "GROUP BY t.person_name ORDER BY t.person_name";
-	private static final String GET_PEOPLE_TOP = "SELECT t.person_name, SUM(t.price) AS price "
-			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
-			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
-			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) "
-			+ "on s.id = pi.cart_id) AS t "
-			+ "GROUP BY t.person_name ORDER BY price DESC";
+	private static final String GET_PEOPLE_ALPHA = "SELECT p.id, p.person_name, SUM(pi.price*pi.quantity) as price "
+			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON "
+			+ "pr.id = pi.product_id) on s.id = pi.cart_id "
+			+ "GROUP BY p.id, p.person_name ORDER BY p.person_name";
+	private static final String GET_PEOPLE_TOP = "SELECT p.id, p.person_name, SUM(pi.price*pi.quantity) as price "
+			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi "
+			+ "ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name ORDER BY price DESC";
 	
 	/* Fill in data */
-	private static String GET_CUST_PRODS = "SELECT p.person_name, pr.product_name, pi.price "
-			+ "FROM (person p JOIN shopping_cart s on  p.id = s.person_id) "
-			+ "JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
-			+ "ORDER BY p.person_name";
+	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
+			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi "
+			+ "ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name, pr.product_name "
+			+ "ORDER BY p.person_name;";
 	private static String GET_STATE_PRODS = "SELECT tot.state_name, product_name, SUM(tot.price) as price "
 			+ "FROM (SELECT s.state_name, pr.product_name, (pr.price * quantity) AS price "
 			+ "FROM (state s JOIN person p ON p.state_id = s.id) JOIN "
