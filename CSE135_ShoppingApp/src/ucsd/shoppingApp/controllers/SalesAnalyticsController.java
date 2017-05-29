@@ -59,15 +59,26 @@ public class SalesAnalyticsController extends HttpServlet {
 		request.getSession().setAttribute("rowChoice", row);
 		String sort = request.getParameter("orderChoice");
 		request.getSession().setAttribute("orderChoice", sort);
-		System.out.println("Cat: ");
-		System.out.println(request.getParameter("catFilter"));
-		int cat = Integer.parseInt(request.getParameter("catFilter"));
-		request.getSession().setAttribute("catFilter", cat);
 		
-		if(request.getParameter("pageCount") != null) {
-			System.out.println(request.getParameter("pageCount"));
-			int pagecount = Integer.parseInt(request.getParameter("pageCount").toString());
-			System.out.println("page: " + pagecount);
+		//Category Filter numbering
+		if(request.getParameter("catFilter") != null) {
+			int cat = Integer.parseInt(request.getParameter("catFilter"));
+			request.getSession().setAttribute("catFilter", cat);
+		} else {
+			int cat = 0;
+			request.getSession().setAttribute("catFilter", cat);
+		}
+		
+		if(request.getSession().getAttribute("pageCount") != null) {
+			String pc = request.getSession().getAttribute("pageCount").toString();
+			int pagecount = Integer.parseInt(pc);
+			System.out.println(pagecount);
+			if(request.getParameter("prev") != null)
+				pagecount--;
+			if(request.getParameter("next") != null)
+				pagecount++;
+			request.getSession().setAttribute("pageCount", pagecount);
+			System.out.println(pagecount);
 		}
 		
 		//get Table
@@ -118,7 +129,6 @@ public class SalesAnalyticsController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
 	

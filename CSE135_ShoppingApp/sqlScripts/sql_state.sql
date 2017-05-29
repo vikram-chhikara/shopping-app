@@ -23,3 +23,8 @@ FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN
 ((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) 
 JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot 
 GROUP BY tot.state_name, ORDER BY price DESC
+
+SELECT product_name, SUM(price*quantity) as price
+from products_in_cart 
+group by product_name, price
+order by price desc;

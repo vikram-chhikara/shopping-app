@@ -80,12 +80,9 @@
 							</option>
 							<%
 							}
-							if(session.getAttribute("catFilter") == null) {
-								session.setAttribute("catFilter", 0);
-							}
+							
 							%>
 						</select>
-			  		</form>
 				</td>
 			</tr>
 			
@@ -144,12 +141,15 @@
 			if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) {
 				//String pagenext = "./salesAnalytics.jsp?pageCount=";
 				int pagecount = 0;
-				if(request.getParameter("pageCount") != null) {
-					pagecount = Integer.parseInt(request.getParameter("pageCount").toString());
+				if(session.getAttribute("pageCount") == null) {
+					session.setAttribute("pageCount", 0);
+					//pagecount = Integer.parseInt(request.getParameter("pageCount").toString());
 				}
+				
 			%>
-				<form method="POST" action="SalesController"> <input type="Submit" value="Previous"></input> <input type="hidden" name="pageCount" value=<%=pagecount - 1 %>/> </form>
-				<form method="POST" action="SalesController"> <input type="Submit" value="Next"></input> <input type="hidden" name="pageCount" value=<%=pagecount - 1 %>/> </form>
+				<input type="Submit" name="prev" value="Previous"></input>
+				<input type="Submit" name="next" value="Next"></input>
+				</form>
 			<%
 			}
 		}
