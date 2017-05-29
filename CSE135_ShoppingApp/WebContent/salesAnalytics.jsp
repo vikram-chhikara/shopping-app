@@ -62,11 +62,11 @@
 					<p>
 			   			Row: <select name="rowChoice">
 			  				<option value="c">Customers</option>
-			  				<option value="s" <%if((request.getAttribute("rowChoice") != null) && (request.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
+			  				<option value="s" <%if((session.getAttribute("rowChoice") != null) && (session.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
 						</select>
 						Order: 	<select name="orderChoice">
 			  				<option value="a">Alphabetical</option>
-			  				<option value="t" <%if((request.getAttribute("orderChoice") != null) && (request.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
+			  				<option value="t" <%if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
 						</select>
 						<input type="Submit" value="Run Query"></input> </p>
 						<!-- Sales Filtering Options -->
@@ -75,7 +75,7 @@
 							<%
 							for (CategoryModel cat : category_list) {
 							%>
-							<option value="<%=cat.getId()%>" <%if((request.getAttribute("catFilter") != null) && ((Integer)request.getAttribute("catFilter") == cat.getId())) { %> selected="selected" <%} %>> 
+							<option value="<%=cat.getId()%>" <%if((session.getAttribute("catFilter") != null) && ((Integer)session.getAttribute("catFilter") == cat.getId())) { %> selected="selected" <%} %>> 
 								<%=cat.getCategoryName()%>
 							</option>
 							<%
@@ -136,8 +136,19 @@
 					<%
 				}
 			%>
-			</table>	
-	<%
+			</table>
+			<%
+			if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) {
+				String pagenext = "./salesAnalytics.jsp?page=";
+				int pagecount = 0;
+				if(request.getAttribute("pageCount") != null) {
+					pagecount = Integer.parseInt(request.getAttribute("pageCount").toString());
+				}
+			%>
+				<a href=<%=pagenext + (pagecount - 1) %>>Previous</a>
+				<a href=<%=pagenext + (1 + pagecount) %>>Next</a>
+			<%
+			}
 		}
 		else { %>
 			<h3>This page is available to owners only</h3>

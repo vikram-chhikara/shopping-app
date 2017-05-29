@@ -56,11 +56,11 @@ public class SalesAnalyticsController extends HttpServlet {
 
 		//check dropdown menu(s)
 		String row = request.getParameter("rowChoice");
-		request.setAttribute("rowChoice", row);
+		request.getSession().setAttribute("rowChoice", row);
 		String sort = request.getParameter("orderChoice");
-		request.setAttribute("orderChoice", sort);
+		request.getSession().setAttribute("orderChoice", sort);
 		int cat = Integer.parseInt(request.getParameter("catFilter"));
-		request.setAttribute("catFilter", cat);
+		request.getSession().setAttribute("catFilter", cat);
 		
 		//get Table
 		System.out.println("Getting table");

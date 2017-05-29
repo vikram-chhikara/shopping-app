@@ -22,7 +22,7 @@ public class SalesDAO {
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT ? OFFSET ?";
+			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 20 OFFSET ?";
 	private static final String GET_PEOPLE_ALPHA = "SELECT t.person_name, SUM(t.price) AS price "
 			+ "FROM (SELECT p.person_name, pr.product_name, pi.price FROM "
 			+ "(person p LEFT OUTER JOIN shopping_cart s on p.id = s.person_id) "
@@ -67,8 +67,7 @@ public class SalesDAO {
 		try {
 			if(o.equals("t")) {
 				pstmt = con.prepareStatement(GET_STATES_TOP);
-				pstmt.setInt(1, 20);
-				pstmt.setInt(2, 0);
+				pstmt.setInt(1, 0);
 				
 				System.out.println(pstmt);
 			} else {
