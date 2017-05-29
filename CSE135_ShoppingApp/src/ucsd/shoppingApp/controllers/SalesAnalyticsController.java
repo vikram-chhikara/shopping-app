@@ -62,6 +62,15 @@ public class SalesAnalyticsController extends HttpServlet {
 		int cat = Integer.parseInt(request.getParameter("catFilter"));
 		request.getSession().setAttribute("catFilter", cat);
 		
+		//note page
+		System.out.println(request.getParameter("pageCount"));
+		if(request.getParameter("pageCount") != null) {
+			int pg = Integer.parseInt(request.getParameter("pageCount"));
+
+			System.out.println(pg);
+			request.setAttribute("pageCount", pg);
+		}
+		
 		//get Table
 		System.out.println("Getting table");
 		if(row.equals("c")) {

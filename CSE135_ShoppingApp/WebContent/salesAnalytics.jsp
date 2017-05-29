@@ -139,13 +139,15 @@
 			</table>
 			<%
 			if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) {
-				String pagenext = "./salesAnalytics.jsp?page=";
+				String pagenext = "./salesAnalytics.jsp?pageCount=";
 				int pagecount = 0;
 				if(request.getAttribute("pageCount") != null) {
 					pagecount = Integer.parseInt(request.getAttribute("pageCount").toString());
+					//request.setAttribute("pageCount", pagecount);
+					System.out.println(pagecount);
 				}
 			%>
-				<a href=<%=pagenext + (pagecount - 1) %>>Previous</a>
+				<a href=<%=pagenext + (pagecount - 1)%>>Previous</a>
 				<a href=<%=pagenext + (1 + pagecount) %>>Next</a>
 			<%
 			}
