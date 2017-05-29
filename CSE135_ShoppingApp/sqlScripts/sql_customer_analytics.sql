@@ -29,17 +29,14 @@ FROM person p, product pr, shopping_cart s, products_in_cart pi
 WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id
 ORDER BY p.person_name);
 
-/*Simple Query; gives customers and their purchased products and price*/
-SELECT p.person_name, pr.product_name, pi.price
+
+-- Products per customer and full pricing --
+SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as Total
 FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
+GROUP BY p.id, p.person_name, pr.product_name
 ORDER BY p.person_name;
 
-/*Simple Query with Joins*/
-SELECT p.person_name, pr.product_name, pi.price
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-ORDER BY p.person_name;
-
-/*Better query than before; gives quantity of each product*/
+/*Gives quantity of each product*/
 SELECT t.person_name, t.product_name, t.price, COUNT(t.product_name) AS Quanatity
 FROM
 (SELECT p.person_name, pr.product_name, pi.price
