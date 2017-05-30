@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -28,8 +29,9 @@ public class SalesAnalyticsController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     
 	private SalesDAO aDB = null;
-    private ArrayList<AnalyticsModel> aList = null;
 	private Connection con = null;
+	
+    private HashMap<String, HashMap<String, Double>> tableVals = null;
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -43,8 +45,8 @@ public class SalesAnalyticsController extends HttpServlet {
 	public void init() throws ServletException {
 		con = ConnectionManager.getConnection();
 		aDB = new SalesDAO(con);
-		aList = new ArrayList<AnalyticsModel>();
-		
+		tableVals = new HashMap<String, HashMap<String, Double>>();
+
 		super.init();
 	}
 
@@ -83,14 +85,14 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//get Table
 		if(row.equals("c")) {
-			aList = aDB.getPersonTable();
+			tableVals = aDB.getTable("person");
 		} else if (row.equals("s")) {
-			aList = aDB.getStateTable();
+			tableVals = aDB.getTable("state");
 		}
 		else {
-			aList = new ArrayList<AnalyticsModel>();
+			tableVals = new HashMap<String, HashMap<String, Double>>();
 		}
-		request.getSession().setAttribute("alist", aList);
+		request.getSession().setAttribute("alist", tableVals);
 		
 		//Get row list 
 		ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();

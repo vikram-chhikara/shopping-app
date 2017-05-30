@@ -14,15 +14,13 @@
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
-			ArrayList<AnalyticsModel> an;
+			//Get table values
+			HashMap<String, HashMap<String, Double>> an;
 			if(session.getAttribute("alist") != null) {
-				an = (ArrayList<AnalyticsModel>)session.getAttribute("alist");
+				an = (HashMap<String, HashMap<String, Double>>)session.getAttribute("alist");
 			} else {
 				System.out.println("null list");
-				an = new ArrayList<AnalyticsModel>();
-				//test
-				AnalyticsModel amy = new AnalyticsModel("name","test",5);
-				an.add(amy);
+				an = new HashMap<String, HashMap<String, Double>>();
 			}
 			
 			//get Row Names
@@ -99,10 +97,10 @@
 				}
 				%>
 				<%
-				AnalyticsModel am;
+				HashMap<String, Double> prodpri;
 				String currRow = "";
 				String rowVal = "(0.0)";
-				int find = 0;
+				Double pri = 0.0;
 				
 				for(int i = 0; i < rowNames.size(); i++) {
 					currRow = rowNames.get(i).getRowName();
@@ -112,22 +110,21 @@
 					<td style="border:1px solid black; font-weight:bold"><%=rowVal %></td>
 					<% 
 						for(int j = 0; j < prodNames.size(); j++) {
-							for(int k = 0; k < an.size(); k++) {
-								am = an.get(k);
-								if(am.getRowName().equals(currRow) && am.getProduct().equals(prodNames.get(j))) {
+							if(an.containsKey(currRow)) {
+								prodpri = an.get(currRow);
+								if(prodpri.containsKey(prodNames.get(j))) {
+									pri = prodpri.get(prodNames.get(j));
 									%>
-									<td style="border:1px solid black;"><%=am.getPrice() %></td>
+									<td style="border:1px solid black;"><%=pri%></td>
 									<%
-									find = 1;
-									break;
+								} else {
+									%>
+									<td style="border:1px solid black;"></td>
+									<%
 								}
-							}
-
-							if(find == 1) {
-								find = 0;
 							} else {
 								%>
-									<td style="border:1px solid black;"></td>
+								<td style="border:1px solid black;"></td>
 								<%
 							}
 						}

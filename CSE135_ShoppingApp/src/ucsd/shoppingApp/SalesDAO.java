@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import ucsd.shoppingApp.models.AnalyticsModel;
@@ -36,9 +37,9 @@ public class SalesDAO {
 	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
 			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
-			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi "
+			+ "JOIN (product pr JOIN products_in_cart pi "
 			+ "ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name, pr.product_name "
-			+ "ORDER BY p.person_name;";
+			+ "ORDER BY p.person_name";
 	private static String GET_STATE_PRODS = "SELECT tot.state_name, product_name, SUM(tot.price) as price "
 			+ "FROM (SELECT s.state_name, pr.product_name, (pr.price * quantity) AS price "
 			+ "FROM (state s JOIN person p ON p.state_id = s.id) JOIN "
@@ -160,10 +161,11 @@ public class SalesDAO {
 		return result;
 	}
 	
-	/** List people and associated prices per product */
-	public ArrayList<AnalyticsModel> getPersonTable() {
-		//HashMap<String, ArrayList<AnalyticsModel>>
-		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
+	/** List people or state and associated prices per product */
+	public HashMap<String, HashMap<String, Double>> getTable(String type) {
+		HashMap<String, HashMap<String, Double>> table = new HashMap<String, HashMap<String, Double>>();
+		HashMap<String, Double> prodpri;
+		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
@@ -172,12 +174,18 @@ public class SalesDAO {
 		Double pri = 0.0;
 		
 		try {
-			pstmt = con.prepareStatement(GET_CUST_PRODS);
+			if(type.equals("person"))
+				pstmt = con.prepareStatement(GET_CUST_PRODS);
+			else
+				pstmt = con.prepareStatement(GET_STATE_PRODS);
 			
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {
-				row = rs.getString("person_name");
+				if(type.equals("person"))
+					row = rs.getString("person_name");
+				else
+					row = rs.getString("state_name");
 				prod = rs.getString("product_name");
 				pri = rs.getDouble("price");
 				
@@ -188,51 +196,13 @@ public class SalesDAO {
 					pri = 0.0;
 				}
 				
-				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
-				table.add(a);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
+				if(table.containsKey(row)) {
+					table.get(row).put(prod, pri);
+				} else {
+					prodpri = new HashMap<String, Double>();
+					prodpri.put(prod, pri);
+					table.put(row, prodpri);
 				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return table;
-	}
-	
-	/** List states and full purchases per product */
-	public ArrayList<AnalyticsModel> getStateTable() {
-		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		String row = "";
-		String prod = "";
-		Double pri = 0.0;
-		
-		try {
-			pstmt = con.prepareStatement(GET_STATE_PRODS);
-			
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				row = rs.getString("state_name");
-				prod = rs.getString("product_name");
-				pri = rs.getDouble("price");
-				
-				if(prod == null) {
-					prod = "";
-				}
-				
-				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
-				table.add(a);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
