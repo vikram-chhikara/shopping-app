@@ -67,8 +67,6 @@ public class SalesDAO {
 			if(o.equals("t")) {
 				pstmt = con.prepareStatement(GET_STATES_TOP);
 				pstmt.setInt(1, 0);
-				
-				System.out.println(pstmt);
 			} else {
 				pstmt = con.prepareStatement(GET_STATES_ALPHA);
 			}

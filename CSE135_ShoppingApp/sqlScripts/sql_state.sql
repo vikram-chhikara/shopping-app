@@ -25,3 +25,7 @@ JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
 GROUP BY tot.state_name, ORDER BY price DESC
 
 -- Products Listed by Top Price --
+SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price 
+FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id 
+GROUP BY product_name, pr.price 
+ORDER BY price DESC
