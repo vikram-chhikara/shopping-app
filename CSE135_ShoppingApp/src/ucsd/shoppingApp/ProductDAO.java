@@ -11,7 +11,13 @@ import ucsd.shoppingApp.models.ProductModel;
 import ucsd.shoppingApp.models.ProductModelExtended;
 
 public class ProductDAO {
+	//Alphabetical ordering used for sales analysis
 	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT * FROM PRODUCT ORDER BY product_name";
+	//Top value ordering used for sales analysis
+	private static final String SELECT_PRODUCTS_TOP_K = "SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
+			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
+			+ "GROUP BY product_name, pr.price "
+			+ "ORDER BY price DESC";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
@@ -37,13 +43,16 @@ public class ProductDAO {
 	}
 	
 	/** Get valid products **/
-	public ArrayList<String> getProductList() throws SQLException {
+	public ArrayList<String> getProductList(String type) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<String> result = new ArrayList<String>();
 		
 		try {
-			pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
+			if(type.equals("a"))
+				pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
+			else
+				pstmt = con.prepareStatement(SELECT_PRODUCTS_TOP_K);
 			
 			rs = pstmt.executeQuery();
 

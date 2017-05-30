@@ -109,7 +109,8 @@ public class SalesAnalyticsController extends HttpServlet {
 		try {
 			conn = ConnectionManager.getConnection();
 			ProductDAO prodDB = new ProductDAO(conn);
-			colList = prodDB.getProductList();
+			
+			colList = prodDB.getProductList(sort);
 			request.getSession().setAttribute("prodList", colList);
 		}
 		catch(SQLException e) {
