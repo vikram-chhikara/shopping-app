@@ -18,6 +18,11 @@ public class ProductDAO {
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
 			+ "GROUP BY product_name, pr.price "
 			+ "ORDER BY price DESC";
+	//products filtered by category
+	private static final String SELECT_PRODUCTS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
+			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
+			+ "GROUP BY product_name, pr.price "
+			+ "ORDER BY price DESC";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
@@ -43,7 +48,7 @@ public class ProductDAO {
 	}
 	
 	/** Get valid products **/
-	public ArrayList<String> getProductList(String type) throws SQLException {
+	public ArrayList<String> getProductList(String type, int cat) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<String> result = new ArrayList<String>();
@@ -51,8 +56,15 @@ public class ProductDAO {
 		try {
 			if(type.equals("a"))
 				pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
-			else
-				pstmt = con.prepareStatement(SELECT_PRODUCTS_TOP_K);
+			else {
+				if(cat == 0) {
+					pstmt = con.prepareStatement(SELECT_PRODUCTS_TOP_K);
+				} else {
+					pstmt = con.prepareStatement(SELECT_PRODUCTS_BY_CAT);
+					pstmt.setInt(1, cat);
+				}
+			}
+				
 			
 			rs = pstmt.executeQuery();
 

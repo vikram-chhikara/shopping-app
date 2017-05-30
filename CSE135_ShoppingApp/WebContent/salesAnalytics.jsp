@@ -14,32 +14,6 @@
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
-			//Get table values
-			HashMap<String, HashMap<String, Double>> an;
-			if(session.getAttribute("alist") != null) {
-				an = (HashMap<String, HashMap<String, Double>>)session.getAttribute("alist");
-			} else {
-				System.out.println("null list");
-				an = new HashMap<String, HashMap<String, Double>>();
-			}
-			
-			//get Row Names
-			ArrayList<AnalyticsModel> rowNames;
-			if(session.getAttribute("rowList") != null) {
-				rowNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
-			} else {
-				System.out.println("Empty row list");
-				rowNames = new ArrayList<AnalyticsModel>();
-			}
-			
-			//get Product Names
-			ArrayList<String> prodNames;
-			if(session.getAttribute("prodList") != null) {
-				prodNames = (ArrayList<String>)session.getAttribute("prodList");
-			} else {
-				System.out.println("Empty product list");
-				prodNames = new ArrayList<String>();
-			}
 	%> 
 	<!-- Sales Filtering Category List -->
 	<%
@@ -90,6 +64,34 @@
 			<table style="border-collapse:collapse;" width="100%">
 				<tr style="border:1px solid black;" > <td></td>
 				<%
+				//Get table values
+				HashMap<String, HashMap<String, Double>> an;
+				if(session.getAttribute("alist") != null) {
+					an = (HashMap<String, HashMap<String, Double>>)session.getAttribute("alist");
+				} else {
+					System.out.println("null list");
+					an = new HashMap<String, HashMap<String, Double>>();
+				}
+				
+				//get Row Names
+				ArrayList<AnalyticsModel> rowNames;
+				if(session.getAttribute("rowList") != null) {
+					rowNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
+				} else {
+					System.out.println("Empty row list");
+					rowNames = new ArrayList<AnalyticsModel>();
+				}
+				
+				//get Product Names
+				ArrayList<String> prodNames;
+				if(session.getAttribute("prodList") != null) {
+					prodNames = (ArrayList<String>)session.getAttribute("prodList");
+				} else {
+					System.out.println("Empty product list");
+					prodNames = new ArrayList<String>();
+				}
+				
+				/* Start with product list */
 				for(int i = 0; i < prodNames.size(); i++) {
 					%>
 					<td style="border:1px solid black; font-weight:bold"><%=prodNames.get(i) %></td>

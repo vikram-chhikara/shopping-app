@@ -55,6 +55,8 @@ public class SalesAnalyticsController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./salesAnalytics.jsp";
+		
+		System.out.println("doget");
 
 		//check dropdown menu(s)
 		String row = request.getParameter("rowChoice");
@@ -62,32 +64,33 @@ public class SalesAnalyticsController extends HttpServlet {
 		String sort = request.getParameter("orderChoice");
 		request.getSession().setAttribute("orderChoice", sort);
 		
+		int cat;
 		//Category Filter numbering
 		if(request.getParameter("catFilter") != null) {
-			int cat = Integer.parseInt(request.getParameter("catFilter"));
-			request.getSession().setAttribute("catFilter", cat);
+			cat = Integer.parseInt(request.getParameter("catFilter"));
 		} else {
-			int cat = 0;
-			request.getSession().setAttribute("catFilter", cat);
+			cat = 0;
 		}
+		request.getSession().setAttribute("catFilter", cat);
+		System.out.println(cat);
 		
+		int pagecount = 0;
 		if(request.getSession().getAttribute("pageCount") != null) {
 			String pc = request.getSession().getAttribute("pageCount").toString();
-			int pagecount = Integer.parseInt(pc);
-			System.out.println(pagecount);
-			if(request.getParameter("prev") != null)
+			pagecount = Integer.parseInt(pc);
+			if(request.getParameter("prev") != null && pagecount > 0)
 				pagecount--;
 			if(request.getParameter("next") != null)
 				pagecount++;
 			request.getSession().setAttribute("pageCount", pagecount);
-			System.out.println(pagecount);
+			System.out.println("pg: " + pagecount);
 		}
 		
 		//get Table
 		if(row.equals("c")) {
-			tableVals = aDB.getTable("person");
+			tableVals = aDB.getTable("person", 0);
 		} else if (row.equals("s")) {
-			tableVals = aDB.getTable("state");
+			tableVals = aDB.getTable("state", cat);
 		}
 		else {
 			tableVals = new HashMap<String, HashMap<String, Double>>();
@@ -98,9 +101,9 @@ public class SalesAnalyticsController extends HttpServlet {
 		ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
 		Connection conn = null;
 		if(row == null || row.equals("c")) {
-			rowList = aDB.getPersonList(sort);
+			rowList = aDB.getPersonList(sort, pagecount, cat);
 		} else {
-			rowList = aDB.getStateList(sort);
+			rowList = aDB.getStateList(sort, pagecount, cat);
 		}
 		request.getSession().setAttribute("rowList", rowList);
 
@@ -110,7 +113,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			conn = ConnectionManager.getConnection();
 			ProductDAO prodDB = new ProductDAO(conn);
 			
-			colList = prodDB.getProductList(sort);
+			colList = prodDB.getProductList(sort, cat);
 			request.getSession().setAttribute("prodList", colList);
 		}
 		catch(SQLException e) {

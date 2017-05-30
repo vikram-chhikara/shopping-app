@@ -44,7 +44,7 @@ public class AnalyticsModel {
 		AnalyticsModel aMove;
 		
 		int r_size = am.size();
-		for(int amove = 0; amove < r_size; amove++) {
+		for(int amove = 0, a = 0; amove < r_size && a < r_size; amove++, a++) {
 			aMove = am.get(amove);
 			if(aMove.getPrice() != 0.0) {
 				break;

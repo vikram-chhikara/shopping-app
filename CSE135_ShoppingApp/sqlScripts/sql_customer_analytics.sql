@@ -67,13 +67,12 @@ GROUP BY t.person_name
 ORDER BY Total DESC
 
 /*total by category*/
-SELECT t.category_id, SUM(t.price) AS Category_Sum
-FROM
-(SELECT p.person_name, pr.product_name, pr.category_id, pi.price
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-ORDER BY p.person_name) t
-GROUP BY t.category_id
-ORDER BY Category_Sum desc
+SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price 
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) 
+LEFT OUTER JOIN (product pr JOIN products_in_cart pi 
+ON pr.id = pi.product_id AND category_id = ?) on s.id = pi.cart_id 
+GROUP BY p.id, p.person_name 
+ORDER BY price DESC
 
 /*Above query using precomputation*/
 SELECT t.category_id, SUM(t.price) AS Category_Sum
