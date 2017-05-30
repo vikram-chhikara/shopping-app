@@ -83,18 +83,22 @@
 				}
 				
 				//get Product Names
-				ArrayList<String> prodNames;
+				ArrayList<AnalyticsModel> prodNames;
 				if(session.getAttribute("prodList") != null) {
-					prodNames = (ArrayList<String>)session.getAttribute("prodList");
+					prodNames = (ArrayList<AnalyticsModel>)session.getAttribute("prodList");
 				} else {
 					System.out.println("Empty product list");
-					prodNames = new ArrayList<String>();
+					prodNames = new ArrayList<AnalyticsModel>();
 				}
 				
+				String curProd;
+				AnalyticsModel prodRef;
 				/* Start with product list */
 				for(int i = 0; i < prodNames.size(); i++) {
+					prodRef = prodNames.get(i);
+					curProd = prodRef.getProduct() + "\n (" + prodRef.getPrice() + ")";
 					%>
-					<td style="border:1px solid black; font-weight:bold"><%=prodNames.get(i) %></td>
+					<td style="border:1px solid black; font-weight:bold"><%=curProd %></td>
 					<%
 				}
 				%>
@@ -114,8 +118,8 @@
 						for(int j = 0; j < prodNames.size(); j++) {
 							if(an.containsKey(currRow)) {
 								prodpri = an.get(currRow);
-								if(prodpri.containsKey(prodNames.get(j))) {
-									pri = prodpri.get(prodNames.get(j));
+								if(prodpri.containsKey(prodNames.get(j).getRowName())) {
+									pri = prodpri.get(prodNames.get(j).getRowName());
 									%>
 									<td style="border:1px solid black;"><%=pri%></td>
 									<%

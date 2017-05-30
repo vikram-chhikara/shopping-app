@@ -7,12 +7,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import ucsd.shoppingApp.models.AnalyticsModel;
 import ucsd.shoppingApp.models.ProductModel;
 import ucsd.shoppingApp.models.ProductModelExtended;
 
 public class ProductDAO {
 	//Alphabetical ordering used for sales analysis
-	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT * FROM PRODUCT ORDER BY product_name";
+	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT product_name, COALESCE(SUM(pr.price*quantity),0) as price "
+			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
+			+ "GROUP BY product_name, pr.price "
+			+ "ORDER BY product_name";
 	//Alphabetical ordering filtered by category
 	private static final String SELECT_ALPHA_PRODS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
 			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
@@ -53,10 +57,10 @@ public class ProductDAO {
 	}
 	
 	/** Get valid products **/
-	public ArrayList<String> getProductList(String type, int cat) throws SQLException {
+	public ArrayList<AnalyticsModel> getProductList(String type, int cat) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
 		
 		try {
 			if(type.equals("a"))
@@ -75,11 +79,18 @@ public class ProductDAO {
 				}
 			}
 				
+			AnalyticsModel am;
+			String prod;
+			Double pri;
 			
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-				result.add(rs.getString("product_name"));
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				
+				am = new AnalyticsModel(prod, prod, pri);
+				result.add(am);
 			}
 			return result;
 		} catch (SQLException e) {

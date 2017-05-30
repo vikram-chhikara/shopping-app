@@ -104,7 +104,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		request.getSession().setAttribute("rowList", rowList);
 
 		//and product list
-		ArrayList<String> colList = new ArrayList<String>();
+		ArrayList<AnalyticsModel> colList = new ArrayList<AnalyticsModel>();
 		try {
 			conn = ConnectionManager.getConnection();
 			ProductDAO prodDB = new ProductDAO(conn);
