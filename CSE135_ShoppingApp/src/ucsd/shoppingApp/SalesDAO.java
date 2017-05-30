@@ -36,18 +36,30 @@ public class SalesDAO {
 			+ "ORDER BY price DESC LIMIT 20 OFFSET ?";
 	
 	/* Get row names with extra category filter */
-	private static String GET_STATES_FILTER = "SELECT tot.state_name, SUM(tot.price) AS price "
+	private static String GET_STATES_TOP_FILTER = "SELECT tot.state_name, SUM(tot.price) AS price "
 			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id AND category_id = ?) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 20 OFFSET ?";
-	private static String GET_CUST_FILTER = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
+	private static String GET_CUST_TOP_FILTER = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
 			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
 			+ "LEFT OUTER JOIN (product pr JOIN products_in_cart pi "
 			+ "ON pr.id = pi.product_id AND category_id = ?) on s.id = pi.cart_id "
 			+ "GROUP BY p.id, p.person_name "
 			+ "ORDER BY price DESC LIMIT 20 OFFSET ?";
+	private static String GET_STATES_ALPHABETICAL_FILTER = "SELECT tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
+			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
+			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
+			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id AND category_id = ?) ON p.id = person_id) as tot "
+			+ "GROUP BY tot.state_name ORDER BY state_name";
+	private static String GET_CUST_ALPHA_FILTER = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
+			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
+			+ "LEFT OUTER JOIN (product pr JOIN products_in_cart pi "
+			+ "ON pr.id = pi.product_id AND category_id = ?) on s.id = pi.cart_id "
+			+ "GROUP BY p.id, p.person_name "
+			+ "ORDER BY person_name";
 	
 	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
@@ -85,12 +97,17 @@ public class SalesDAO {
 					pstmt.setInt(1, 20 * off);
 				}
 				else {
-					pstmt = con.prepareStatement(GET_STATES_FILTER);
+					pstmt = con.prepareStatement(GET_STATES_TOP_FILTER);
 					pstmt.setInt(1, cat);
 					pstmt.setInt(2, 20 * off);
 				}
 			} else {
-				pstmt = con.prepareStatement(GET_STATES_ALPHA);
+				if(cat == 0)
+					pstmt = con.prepareStatement(GET_STATES_ALPHA);
+				else {
+					pstmt = con.prepareStatement(GET_STATES_ALPHABETICAL_FILTER);
+					pstmt.setInt(1, cat);
+				}
 			}
 			
 			rs = pstmt.executeQuery();
@@ -134,12 +151,17 @@ public class SalesDAO {
 					pstmt = con.prepareStatement(GET_PEOPLE_TOP);
 					pstmt.setInt(1, 20 * off);
 				} else {
-					pstmt = con.prepareStatement(GET_CUST_FILTER);
+					pstmt = con.prepareStatement(GET_CUST_TOP_FILTER);
 					pstmt.setInt(1, cat);
 					pstmt.setInt(2, 20 * off);
 				}
 			} else {
-				pstmt = con.prepareStatement(GET_PEOPLE_ALPHA);
+				if(cat == 0) {
+					pstmt = con.prepareStatement(GET_PEOPLE_ALPHA);
+				} else {
+					pstmt = con.prepareStatement(GET_CUST_ALPHA_FILTER);
+					pstmt.setInt(1, cat);
+				}
 			}
 			
 			rs = pstmt.executeQuery();

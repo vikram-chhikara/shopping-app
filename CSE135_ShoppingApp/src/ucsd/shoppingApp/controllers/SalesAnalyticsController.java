@@ -55,8 +55,6 @@ public class SalesAnalyticsController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./salesAnalytics.jsp";
-		
-		System.out.println("doget");
 
 		//check dropdown menu(s)
 		String row = request.getParameter("rowChoice");
@@ -72,7 +70,6 @@ public class SalesAnalyticsController extends HttpServlet {
 			cat = 0;
 		}
 		request.getSession().setAttribute("catFilter", cat);
-		System.out.println(cat);
 		
 		int pagecount = 0;
 		if(request.getSession().getAttribute("pageCount") != null) {
@@ -83,7 +80,6 @@ public class SalesAnalyticsController extends HttpServlet {
 			if(request.getParameter("next") != null)
 				pagecount++;
 			request.getSession().setAttribute("pageCount", pagecount);
-			System.out.println("pg: " + pagecount);
 		}
 		
 		//get Table

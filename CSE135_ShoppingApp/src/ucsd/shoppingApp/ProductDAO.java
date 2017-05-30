@@ -13,6 +13,11 @@ import ucsd.shoppingApp.models.ProductModelExtended;
 public class ProductDAO {
 	//Alphabetical ordering used for sales analysis
 	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT * FROM PRODUCT ORDER BY product_name";
+	//Alphabetical ordering filtered by category
+	private static final String SELECT_ALPHA_PRODS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
+			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
+			+ "GROUP BY product_name, pr.price "
+			+ "ORDER BY product_name";
 	//Top value ordering used for sales analysis
 	private static final String SELECT_PRODUCTS_TOP_K = "SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
@@ -55,7 +60,12 @@ public class ProductDAO {
 		
 		try {
 			if(type.equals("a"))
-				pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
+				if(cat == 0) {
+					pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
+				} else {
+					pstmt = con.prepareStatement(SELECT_ALPHA_PRODS_BY_CAT);
+					pstmt.setInt(1, cat);
+				}
 			else {
 				if(cat == 0) {
 					pstmt = con.prepareStatement(SELECT_PRODUCTS_TOP_K);
