@@ -57,7 +57,8 @@ public class SalesAnalyticsController extends HttpServlet {
 		String forward = "./salesAnalytics.jsp";
 		
 		//Refresh page if linked from menu
-		if(request.getParameter("clean") != null) {
+		if(request.getParameter("clean") != null && Integer.parseInt(request.getParameter("clean")) == 1) {
+			System.out.println("clean: " + request.getParameter("clean"));
 			request.getSession().setAttribute("rowChoice", "customers");
 			request.getSession().setAttribute("orderChoice", "a");
 			request.getSession().setAttribute("catFilter", 0);
@@ -67,9 +68,11 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getSession().setAttribute("alist", new HashMap<String, HashMap<String, Double>>());
 			request.getSession().setAttribute("rowList", new ArrayList<AnalyticsModel>());
 			request.getSession().setAttribute("prodList", new ArrayList<AnalyticsModel>());
+			request.setAttribute("clean", 0);
 			request.getRequestDispatcher(forward).forward(request, response);
 			return;
 		}
+		System.out.println("done clean");
 
 		//check dropdown menu(s)
 		String row;
@@ -77,7 +80,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		int cat;
 		
 		//keep track of row values and sorting methods/filters
-		if(request.getSession().getAttribute("nextClick") == null) {
+		if(request.getSession().getAttribute("nextClick") == null || Integer.parseInt(request.getSession().getAttribute("nextClick").toString()) == 0) {
 			row = request.getParameter("rowChoice");
 			request.getSession().setAttribute("rowChoice", row);
 			

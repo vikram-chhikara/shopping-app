@@ -11,6 +11,7 @@
 </head>
 <body>
 <%
+	long startTime = System.nanoTime();
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
@@ -177,9 +178,15 @@
 			<h3>This page is available to owners only</h3>
 		<%
 		}
+		
 	}
 	else { %>
 			<h3>Please <a href = "./login.jsp">login</a> before viewing the page</h3>
-	<%} %>
+	<%} 
+		long endTime = System.nanoTime();
+	    long deltaTime = endTime - startTime;
+	    System.out.println("Time: " + deltaTime);
+	%>
+	<p><%=deltaTime %></p>
 </body>
 </html>
