@@ -207,7 +207,7 @@ public class DataGenerator {
 			while(noOfRows < noOfProducts) {
 				ptst.setString(1, "SKU_"+noOfRows);
 				ptst.setString(2, "PROD_"+noOfRows);
-				price = (rand.nextInt(1000)+1)*10;
+				price = (rand.nextInt(100)+1)*10;
 				ptst.setInt(3, price);
 				categoryId = rand.nextInt(noOfCategories)+1;
 				ptst.setInt(4, categoryId);

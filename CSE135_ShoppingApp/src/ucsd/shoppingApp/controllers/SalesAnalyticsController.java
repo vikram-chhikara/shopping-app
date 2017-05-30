@@ -57,35 +57,56 @@ public class SalesAnalyticsController extends HttpServlet {
 		String forward = "./salesAnalytics.jsp";
 
 		//check dropdown menu(s)
-		String row = request.getParameter("rowChoice");
-		request.getSession().setAttribute("rowChoice", row);
-		String sort = request.getParameter("orderChoice");
-		request.getSession().setAttribute("orderChoice", sort);
-		
+		String row;
+		String sort;
 		int cat;
-		//Category Filter numbering
-		if(request.getParameter("catFilter") != null) {
-			cat = Integer.parseInt(request.getParameter("catFilter"));
+		
+		//keep track of row values and sorting methods/filters
+		if(request.getSession().getAttribute("nextClick") == null) {
+			row = request.getParameter("rowChoice");
+			request.getSession().setAttribute("rowChoice", row);
+			
+			sort = request.getParameter("orderChoice");
+			request.getSession().setAttribute("orderChoice", sort);
+			
+			if(request.getParameter("catFilter") != null) {
+				cat = Integer.parseInt(request.getParameter("catFilter"));
+			} else {
+				cat = 0;
+			}
+			request.getSession().setAttribute("catFilter", cat);
 		} else {
-			cat = 0;
+			row = request.getSession().getAttribute("rowChoice").toString();
+			sort = request.getSession().getAttribute("orderChoice").toString();
+			cat = Integer.parseInt(request.getSession().getAttribute("catFilter").toString());
 		}
-		request.getSession().setAttribute("catFilter", cat);
 		
 		int pagecount = 0;
-		if(request.getSession().getAttribute("pageCount") != null) {
+		//page count for row display
+		if(request.getParameter("nextRow") != null) {
 			String pc = request.getSession().getAttribute("pageCount").toString();
 			pagecount = Integer.parseInt(pc);
-			if(request.getParameter("prev") != null && pagecount > 0)
-				pagecount--;
-			if(request.getParameter("next") != null)
-				pagecount++;
+			pagecount++;
+			
 			request.getSession().setAttribute("pageCount", pagecount);
+			request.getSession().setAttribute("nextClick", 1);
+		}
+		
+		//col count for column display
+		int colcount = 0;
+		if(request.getParameter("nextCol") != null) {
+			String pc = request.getSession().getAttribute("columnCount").toString();
+			colcount = Integer.parseInt(pc);
+			colcount++;
+			
+			request.getSession().setAttribute("columnCount", colcount);
+			request.getSession().setAttribute("nextClick", 1);
 		}
 		
 		//get Table
-		if(row.equals("c")) {
+		if(row.equals("customers")) {
 			tableVals = aDB.getTable("person", 0);
-		} else if (row.equals("s")) {
+		} else if (row.equals("states")) {
 			tableVals = aDB.getTable("state", cat);
 		}
 		else {
@@ -96,7 +117,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		//Get row list 
 		ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
 		Connection conn = null;
-		if(row == null || row.equals("c")) {
+		if(row == null || row.equals("customers")) {
 			rowList = aDB.getPersonList(sort, pagecount, cat);
 		} else {
 			rowList = aDB.getStateList(sort, pagecount, cat);
@@ -109,7 +130,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			conn = ConnectionManager.getConnection();
 			ProductDAO prodDB = new ProductDAO(conn);
 			
-			colList = prodDB.getProductList(sort, cat);
+			colList = prodDB.getProductList(sort, cat, colcount);
 			request.getSession().setAttribute("prodList", colList);
 		}
 		catch(SQLException e) {

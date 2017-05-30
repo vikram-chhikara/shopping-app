@@ -21,6 +21,11 @@
 		CategoryDAO categoryDao = new CategoryDAO(con);
 		List<CategoryModel> category_list = categoryDao.getCategories();
 		con.close();
+		
+		//basic default
+		if(session.getAttribute("rowChoice") == null) {
+			session.setAttribute("rowChoice", "customers");
+		}
 	%>
 	
 	<!-- Basic Filtering -->
@@ -32,9 +37,14 @@
 					<h3>Hello <%= session.getAttribute("personName") %></h3>
 					<form method="POST" action="SalesController">
 					<p>
+					<%
+					System.out.println("next Click: ");
+					System.out.println(session.getAttribute("nextClick"));
+						if(session.getAttribute("nextClick") == null) {
+					%>
 			   			Row: <select name="rowChoice">
-			  				<option value="c">Customers</option>
-			  				<option value="s" <%if((session.getAttribute("rowChoice") != null) && (session.getAttribute("rowChoice")).equals("s")) { %> selected <% } %>>States</option>
+			  				<option value="customers">Customers</option>
+			  				<option value="states" <%if((session.getAttribute("rowChoice") != null) && (session.getAttribute("rowChoice")).equals("states")) { %> selected <% } %>>States</option>
 						</select>
 						Order: 	<select name="orderChoice">
 			  				<option value="a">Alphabetical</option>
@@ -52,7 +62,7 @@
 							</option>
 							<%
 							}
-							
+						}
 							%>
 						</select>
 				</td>
@@ -141,17 +151,24 @@
 			%>
 			</table>
 			<%
-			if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) {
-				//String pagenext = "./salesAnalytics.jsp?pageCount=";
+			if((session.getAttribute("orderChoice") != null)) {
 				int pagecount = 0;
+				int columncnt = 0;
 				if(session.getAttribute("pageCount") == null) {
 					session.setAttribute("pageCount", 0);
-					//pagecount = Integer.parseInt(request.getParameter("pageCount").toString());
+				}
+				if(session.getAttribute("columnCount") == null) {
+					session.setAttribute("columnCount", 0);
 				}
 				
+				if(prodNames.size() > 0) {
 			%>
-				<input type="Submit" name="prev" value="Previous"></input>
-				<input type="Submit" name="next" value="Next"></input>
+				<input type="Submit" name="nextCol" value="Next 10 Products"></input>
+				<% } 
+				if(rowNames.size() > 0) {
+				%>
+				<input type="Submit" name="nextRow" value="Next 20 <%=session.getAttribute("rowChoice").toString()%>"></input>
+				<%} %>
 				</form>
 			<%
 			}

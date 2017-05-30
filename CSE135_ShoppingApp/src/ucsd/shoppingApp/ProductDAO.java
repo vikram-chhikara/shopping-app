@@ -16,22 +16,22 @@ public class ProductDAO {
 	private static final String SELECT_ALL_PRODUCT_SQL_ALPHA = "SELECT product_name, COALESCE(SUM(pr.price*quantity),0) as price "
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY product_name";
+			+ "ORDER BY product_name LIMIT 10 OFFSET ?";
 	//Alphabetical ordering filtered by category
 	private static final String SELECT_ALPHA_PRODS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
 			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY product_name";
+			+ "ORDER BY product_name LIMIT 10 OFFSET ?";
 	//Top value ordering used for sales analysis
 	private static final String SELECT_PRODUCTS_TOP_K = "SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY price DESC";
+			+ "ORDER BY price DESC LIMIT 10 OFFSET ?";
 	//products filtered by category
 	private static final String SELECT_PRODUCTS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
 			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY price DESC";
+			+ "ORDER BY price DESC LIMIT 10 OFFSET ?";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
@@ -57,7 +57,7 @@ public class ProductDAO {
 	}
 	
 	/** Get valid products **/
-	public ArrayList<AnalyticsModel> getProductList(String type, int cat) throws SQLException {
+	public ArrayList<AnalyticsModel> getProductList(String type, int cat, int col) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
@@ -66,16 +66,20 @@ public class ProductDAO {
 			if(type.equals("a"))
 				if(cat == 0) {
 					pstmt = con.prepareStatement(SELECT_ALL_PRODUCT_SQL_ALPHA);
+					pstmt.setInt(1, col * 10);
 				} else {
 					pstmt = con.prepareStatement(SELECT_ALPHA_PRODS_BY_CAT);
 					pstmt.setInt(1, cat);
+					pstmt.setInt(2, col * 10);
 				}
 			else {
 				if(cat == 0) {
 					pstmt = con.prepareStatement(SELECT_PRODUCTS_TOP_K);
+					pstmt.setInt(1, col * 10);
 				} else {
 					pstmt = con.prepareStatement(SELECT_PRODUCTS_BY_CAT);
 					pstmt.setInt(1, cat);
+					pstmt.setInt(2, col * 10);
 				}
 			}
 				
