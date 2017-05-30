@@ -55,6 +55,21 @@ public class SalesAnalyticsController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./salesAnalytics.jsp";
+		
+		//Refresh page if linked from menu
+		if(request.getParameter("clean") != null) {
+			request.getSession().setAttribute("rowChoice", "customers");
+			request.getSession().setAttribute("orderChoice", "a");
+			request.getSession().setAttribute("catFilter", 0);
+			request.getSession().setAttribute("pageCount", 0);
+			request.getSession().setAttribute("columnCount", 0);
+			request.getSession().setAttribute("nextClick", 0);
+			request.getSession().setAttribute("alist", new HashMap<String, HashMap<String, Double>>());
+			request.getSession().setAttribute("rowList", new ArrayList<AnalyticsModel>());
+			request.getSession().setAttribute("prodList", new ArrayList<AnalyticsModel>());
+			request.getRequestDispatcher(forward).forward(request, response);
+			return;
+		}
 
 		//check dropdown menu(s)
 		String row;
@@ -83,28 +98,27 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		int pagecount = 0;
 		//page count for row display
-		if(request.getParameter("nextRow") != null) {
+		if(request.getSession().getAttribute("pageCount") != null) {
 			String pc = request.getSession().getAttribute("pageCount").toString();
 			pagecount = Integer.parseInt(pc);
-			pagecount++;
-			
+			if(request.getParameter("nextRow") != null) {
+				pagecount++;
+				request.getSession().setAttribute("nextClick", 1);
+			}
 			request.getSession().setAttribute("pageCount", pagecount);
-			request.getSession().setAttribute("nextClick", 1);
-		} else if(request.getSession().getAttribute("pageCount") != null) {
-			pagecount = Integer.parseInt(request.getSession().getAttribute("pageCount").toString());
 		}
 		
 		//col count for column display
 		int colcount = 0;
-		if(request.getParameter("nextCol") != null) {
+		if(request.getSession().getAttribute("columnCount") != null) {
 			String pc = request.getSession().getAttribute("columnCount").toString();
 			colcount = Integer.parseInt(pc);
-			colcount++;
 			
+			if(request.getParameter("nextCol") != null) {
+				colcount++;
+				request.getSession().setAttribute("nextClick", 1);
+			}
 			request.getSession().setAttribute("columnCount", colcount);
-			request.getSession().setAttribute("nextClick", 1);
-		} else if(request.getSession().getAttribute("columnCount") != null) {
-			pagecount = Integer.parseInt(request.getSession().getAttribute("columnCount").toString());
 		}
 		
 		//get Table

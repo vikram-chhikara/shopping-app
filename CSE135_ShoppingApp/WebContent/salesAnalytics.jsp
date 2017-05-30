@@ -40,7 +40,7 @@
 					<%
 					System.out.println("next Click: ");
 					System.out.println(session.getAttribute("nextClick"));
-						if(session.getAttribute("nextClick") == null) {
+						if(session.getAttribute("nextClick") == null || Integer.parseInt(session.getAttribute("nextClick").toString()) == 0) {
 					%>
 			   			Row: <select name="rowChoice">
 			  				<option value="customers">Customers</option>
