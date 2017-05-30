@@ -90,6 +90,8 @@ public class SalesAnalyticsController extends HttpServlet {
 			
 			request.getSession().setAttribute("pageCount", pagecount);
 			request.getSession().setAttribute("nextClick", 1);
+		} else if(request.getSession().getAttribute("pageCount") != null) {
+			pagecount = Integer.parseInt(request.getSession().getAttribute("pageCount").toString());
 		}
 		
 		//col count for column display
@@ -101,6 +103,8 @@ public class SalesAnalyticsController extends HttpServlet {
 			
 			request.getSession().setAttribute("columnCount", colcount);
 			request.getSession().setAttribute("nextClick", 1);
+		} else if(request.getSession().getAttribute("columnCount") != null) {
+			pagecount = Integer.parseInt(request.getSession().getAttribute("columnCount").toString());
 		}
 		
 		//get Table
