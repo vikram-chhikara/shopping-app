@@ -29,13 +29,6 @@ FROM person p, product pr, shopping_cart s, products_in_cart pi
 WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id
 ORDER BY p.person_name);
 
-
--- Products per customer and full pricing --
-SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as Total
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-GROUP BY p.id, p.person_name, pr.product_name
-ORDER BY p.person_name;
-
 /*Gives quantity of each product*/
 SELECT t.person_name, t.product_name, t.price, COUNT(t.product_name) AS Quanatity
 FROM
@@ -66,16 +59,43 @@ FROM Purchase_Precomputed t
 GROUP BY t.person_name
 ORDER BY Total DESC
 
-/*total by category*/
+/*Total category query using precomputation*/
+SELECT t.category_id, SUM(t.price) AS Category_Sum
+FROM Purchase_Precomputed t
+GROUP BY t.category_id
+ORDER BY Category_Sum desc
+
+
+/* Used in Project 2 */
+-- Products per customer and full pricing with alphabetical sort --
+SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price 
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) 
+LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON 
+pr.id = pi.product_id) on s.id = pi.cart_id 
+GROUP BY p.id, p.person_name ORDER BY p.person_name;
+-- LIMIT 20 OFFSET ?;
+
+-- Person purchases sorted by top --
+SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price 
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) 
+LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi 
+ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name 
+ORDER BY price DESC 
+-- LIMIT 20 OFFSET ?
+
+-- Person purchases with category filter --
 SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price 
 FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) 
 LEFT OUTER JOIN (product pr JOIN products_in_cart pi 
 ON pr.id = pi.product_id AND category_id = ?) on s.id = pi.cart_id 
 GROUP BY p.id, p.person_name 
-ORDER BY price DESC
+ORDER BY price DESC 
+-- person_name
+-- LIMIT 20 OFFSET ? --
 
-/*Above query using precomputation*/
-SELECT t.category_id, SUM(t.price) AS Category_Sum
-FROM Purchase_Precomputed t
-GROUP BY t.category_id
-ORDER BY Category_Sum desc
+-- Basic Person x Product cell value
+SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price 
+FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) 
+JOIN (product pr JOIN products_in_cart pi 
+ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name, pr.product_name 
+ORDER BY p.person_name
