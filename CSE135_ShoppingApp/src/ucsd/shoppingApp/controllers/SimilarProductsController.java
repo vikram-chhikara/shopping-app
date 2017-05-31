@@ -2,8 +2,6 @@ package ucsd.shoppingApp.controllers;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -18,9 +16,8 @@ import java.util.List;
 
 
 import ucsd.shoppingApp.ConnectionManager;
-import ucsd.shoppingApp.PersonDAO;
-import ucsd.shoppingApp.ProductDAO;
 import ucsd.shoppingApp.SimilarProductsDAO;
+import ucsd.shoppingApp.models.AnalyticsModel;
 import ucsd.shoppingApp.models.SimilarProductsModel;
 
 /**
@@ -56,24 +53,21 @@ public class SimilarProductsController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./similar_products.jsp";
 		
-		HashMap<String,List<SimilarProductsModel>> pc_map= new HashMap<String,List<SimilarProductsModel>>();
+		System.out.println("DO table");
+		
+		if(request.getParameter("refresh") != null && Integer.parseInt(request.getParameter("refresh")) == 1) {
+			request.getSession().setAttribute("similar_table", null);
+			request.setAttribute("refresh", 0);
+			request.getRequestDispatcher(forward).forward(request, response);
+			return;
+		}
 
 		ArrayList<SimilarProductsModel> result = new ArrayList<SimilarProductsModel>();
-		result = aDB.getProdCustomer();
+		result = aDB.getSimilarity();
+		request.getSession().setAttribute("similar_table", result);
 		
-		for (SimilarProductsModel model : result){
-			List<SimilarProductsModel> li = new ArrayList<>();
-			//li.add(model.getPerson());
-			if( !(pc_map.containsKey(model.getProduct())) ){
-				li.add(model);
-			}
-			else{
-				li = pc_map.get(model.getProduct());
-				li.add(model);
-			}
-			pc_map.put(model.getProduct(), li);
-		}
-		request.getSession().setAttribute("prod_cust_list", pc_map);
+		RequestDispatcher view = request.getRequestDispatcher(forward);
+		view.forward(request, response);
 	}
 	
 	/**

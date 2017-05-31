@@ -1,33 +1,33 @@
 package ucsd.shoppingApp.models;
 
 public class SimilarProductsModel {
-	private String product;
-	private String person;
+	private String product1;
+	private String product2;
 	private double price;
 
 	public SimilarProductsModel(){
 	}
 	
-	public SimilarProductsModel(String pr, String p, double pri) {
-		this.product = pr;
-		this.person = p;
+	public SimilarProductsModel(String p1, String p2, double pri) {
+		this.product1 = p1;
+		this.product2 = p2;
 		this.price = pri;
 	}
 
-	public String getProduct() {
-		return product;
+	public String getProduct1() {
+		return product1;
 	}
 
-	public void setProduct(String pr) {
-		this.product = pr;
+	public void setProduct1(String pr) {
+		this.product1 = pr;
 	}
 
-	public String getPerson() {
-		return person;
+	public String getProduct2() {
+		return product2;
 	}
 
-	public void setPerson(String p) {
-		this.person = p;
+	public void setProduct2(String p) {
+		this.product2 = p;
 	}
 	
 	public double getPrice() {
@@ -47,7 +47,7 @@ public class SimilarProductsModel {
 		//Checks if object is correct
 		if(o instanceof SimilarProductsModel) {
 			//Check if values are correct
-			if(this.getProduct().equals(((SimilarProductsModel)o).getProduct()) && this.getPerson().equals(((SimilarProductsModel)o).getPerson()))
+			if(this.getProduct1().equals(((SimilarProductsModel)o).getProduct1()) && this.getProduct2().equals(((SimilarProductsModel)o).getProduct2()))
 				return true;
 		}
 		
