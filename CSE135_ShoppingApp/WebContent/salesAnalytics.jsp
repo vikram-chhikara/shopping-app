@@ -39,8 +39,6 @@
 					<form method="POST" action="SalesController">
 					<p>
 					<%
-					System.out.println("next Click: ");
-					System.out.println(session.getAttribute("nextClick"));
 						if(session.getAttribute("nextClick") == null || Integer.parseInt(session.getAttribute("nextClick").toString()) == 0) {
 					%>
 			   			Row: <select name="rowChoice">
@@ -183,10 +181,9 @@
 	else { %>
 			<h3>Please <a href = "./login.jsp">login</a> before viewing the page</h3>
 	<%} 
-		long endTime = System.nanoTime();
-	    long deltaTime = endTime - startTime;
-	    System.out.println("Time: " + deltaTime);
+	    long deltaTime = System.nanoTime() - startTime;
+	    System.out.println("Time: " + (deltaTime/1000000));
 	%>
-	<p><%=deltaTime %></p>
+	<p><%=(deltaTime/1000000) %></p>
 </body>
 </html>

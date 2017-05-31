@@ -58,6 +58,7 @@ public class ProductDAO {
 	
 	/** Get valid products **/
 	public ArrayList<AnalyticsModel> getProductList(String type, int cat, int col) throws SQLException {
+		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
@@ -89,6 +90,9 @@ public class ProductDAO {
 			
 			rs = pstmt.executeQuery();
 
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
 			while (rs.next()) {
 				prod = rs.getString("product_name");
 				pri = rs.getDouble("price");

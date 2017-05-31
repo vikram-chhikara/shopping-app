@@ -58,7 +58,6 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//Refresh page if linked from menu
 		if(request.getParameter("clean") != null && Integer.parseInt(request.getParameter("clean")) == 1) {
-			System.out.println("clean: " + request.getParameter("clean"));
 			request.getSession().setAttribute("rowChoice", "customers");
 			request.getSession().setAttribute("orderChoice", "a");
 			request.getSession().setAttribute("catFilter", 0);
@@ -72,7 +71,6 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getRequestDispatcher(forward).forward(request, response);
 			return;
 		}
-		System.out.println("done clean");
 
 		//check dropdown menu(s)
 		String row;

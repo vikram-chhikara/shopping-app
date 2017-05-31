@@ -82,6 +82,8 @@ public class SalesDAO {
 
 	/** List of states for row ordering */
 	public ArrayList<AnalyticsModel> getStateList(String o, int off, int cat) {
+		//timing
+		long tableTime = System.nanoTime();
 		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -114,6 +116,10 @@ public class SalesDAO {
 			}
 			
 			rs = pstmt.executeQuery();
+			
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
 			while (rs.next()) {
 				row = rs.getString("state_name");
 				pri = rs.getDouble("price");
@@ -140,6 +146,7 @@ public class SalesDAO {
 	
 	/** List of customers for row ordering */
 	public ArrayList<AnalyticsModel> getPersonList(String o, int off, int cat) {
+		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
@@ -171,6 +178,10 @@ public class SalesDAO {
 			
 			rs = pstmt.executeQuery();
 
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
+			
 			while (rs.next()) {
 				row = rs.getString("person_name");
 				pri = rs.getDouble("price");
@@ -204,6 +215,7 @@ public class SalesDAO {
 	
 	/** List people or state and associated prices per product */
 	public HashMap<String, HashMap<String, Double>> getTable(String type, int cat) {
+		long tableTime = System.nanoTime();
 		HashMap<String, HashMap<String, Double>> table = new HashMap<String, HashMap<String, Double>>();
 		HashMap<String, Double> prodpri;
 		
@@ -224,6 +236,10 @@ public class SalesDAO {
 			}
 			
 			rs = pstmt.executeQuery();
+			
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
 			
 			while (rs.next()) {
 				if(type.equals("person"))
@@ -248,6 +264,8 @@ public class SalesDAO {
 					table.put(row, prodpri);
 				}
 			}
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
