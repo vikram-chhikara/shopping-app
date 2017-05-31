@@ -71,36 +71,31 @@ ORDER BY p.person_name
 
 
 /*Cosine_Similarity(non-normalized)*/
-FROM(WITH subquery AS(
-SELECT pr.id as Product_id, pr.product_name, p.id as Person_id, p.person_name, SUM(pi.price*pi.quantity) as Total
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-GROUP BY pr.id, pr.product_name, p.id,p.person_name
-ORDER BY pr.product_name)
-SELECT q1.Product_id as id_1, q1.product_name as p1, q2.Product_id as id_2, q2.product_name as p2, SUM(q1.Total*q2.Total) as Cosine_Similarity
-FROM subquery q1
-JOIN subquery q2 on q1.person_name = q2.person_name
-WHERE q1.product_name < q2.product_name
-GROUP BY  q1.Product_id, q1.product_name, q2.Product_id, q2.product_name
-ORDER BY Cosine_Similarity desc
+(WITH subquery AS( 
+SELECT pr.id as prod_id, pr.product_name, p.id as person_id, p.person_name, SUM(pi.price*pi.quantity) as price 
+FROM (person p JOIN shopping_cart s on  p.id = s.person_id) 
+	JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id 
+	GROUP BY pr.id, pr.product_name, p.id,p.person_name 
+	ORDER BY pr.product_name) 
+SELECT q1.prod_id as id_1, q1.product_name as p1, q2.prod_id as id_2, q2.product_name as p2, SUM(q1.price*q2.price) as Cosine_Similarity 
+FROM subquery q1 
+JOIN subquery q2 on q1.person_id = q2.person_id 
+WHERE q1.prod_id < q2.prod_id 
+GROUP BY  q1.prod_id, q1.product_name, q2.prod_id, q2.product_name 
+ORDER BY Cosine_Similarity desc 
 LIMIT 100)
 
-/*attempt at Normalized_Cosine*/
-With den1 as (select Total
-from Purchase_Sales
-where product_id = table1.id_1)
-With den2 as (select Total
-from Purchase_Sales
-where product_id = table1.id_2)
-SELECT table1.Id_1, table1.p1, table1.Id_2, table1.p2, ((table1.cosine_similarity)/(den1)*(den2)) as Normalized_Cosine
-FROM(WITH subquery AS(
-SELECT pr.id as Product_id, pr.product_name, p.id as Person_id, p.person_name, SUM(pi.price*pi.quantity) as Total
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-GROUP BY pr.id, pr.product_name, p.id,p.person_name
-ORDER BY pr.product_name)
-SELECT q1.Product_id as id_1, q1.product_name as p1, q2.Product_id as id_2, q2.product_name as p2, SUM(q1.Total*q2.Total) as Cosine_Similarity
-FROM subquery q1
-JOIN subquery q2 on q1.person_name = q2.person_name
-WHERE q1.product_name < q2.product_name
-GROUP BY  q1.Product_id, q1.product_name, q2.Product_id, q2.product_name
+/*Normalized_Cosine*/
+(WITH subquery AS(
+SELECT pr.id as prod_id, pr.product_name, p.id as person_id, p.person_name, SUM(pi.price*pi.quantity) as price
+FROM (person p JOIN shopping_cart s on  p.id = s.person_id) 
+    JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
+	GROUP BY pr.id, pr.product_name, p.id,p.person_name
+	ORDER BY pr.product_name)
+SELECT q1.prod_id as id_1, q1.product_name as p1, q2.prod_id as id_2, q2.product_name as p2, 
+	(SUM(q1.price*q2.price)/prodc.co) as Cosine_Similarity
+FROM subquery q1 JOIN subquery q2 on q1.person_id = q2.person_id, (SELECT subquery.prod_id, COUNT(subquery.prod_id) AS co FROM subquery GROUP BY prod_id) AS prodc
+WHERE q1.prod_id < q2.prod_id AND prodc.prod_id = q1.prod_id
+GROUP BY  q1.prod_id, q1.product_name, q2.prod_id, q2.product_name, prodc.co
 ORDER BY Cosine_Similarity desc
-LIMIT 100) table1
+LIMIT 100)

@@ -184,6 +184,5 @@
 	    long deltaTime = System.nanoTime() - startTime;
 	    System.out.println("Time: " + (deltaTime/1000000));
 	%>
-	<p><%=(deltaTime/1000000) %></p>
 </body>
 </html>

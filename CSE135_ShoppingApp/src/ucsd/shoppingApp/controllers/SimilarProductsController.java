@@ -53,8 +53,6 @@ public class SimilarProductsController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String forward = "./similar_products.jsp";
 		
-		System.out.println("DO table");
-		
 		if(request.getParameter("refresh") != null && Integer.parseInt(request.getParameter("refresh")) == 1) {
 			request.getSession().setAttribute("similar_table", null);
 			request.setAttribute("refresh", 0);

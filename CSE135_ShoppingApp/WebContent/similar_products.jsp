@@ -13,16 +13,13 @@
 <%
 	if(session.getAttribute("roleName") != null) { %>
 	<% if(session.getAttribute("similar_table") == null) {
-		System.out.println("null table");
 		response.sendRedirect("./SimProductsController");
 	} else {
 		//Get table
 		ArrayList<SimilarProductsModel> simProds;
 		if(session.getAttribute("similar_table") != null) {
-			System.out.println("full table");
 			simProds = (ArrayList<SimilarProductsModel>)session.getAttribute("similar_table");
 		} else {
-			System.out.println("Empty similar prods list");
 			simProds = new ArrayList<SimilarProductsModel>();
 		}
 	%> 
