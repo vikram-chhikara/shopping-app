@@ -9,7 +9,6 @@ import java.util.List;
 
 import java.util.HashMap;
 
-import ucsd.shoppingApp.models.AnalyticsModel;
 import ucsd.shoppingApp.models.SimilarProductsModel;
 
 public class SimilarProductsDAO {
