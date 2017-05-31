@@ -24,7 +24,7 @@ import ucsd.shoppingApp.SimilarProductsDAO;
 import ucsd.shoppingApp.models.SimilarProductsModel;
 
 /**
- * Servlet implementation class SalesAnalyticsController
+ * Servlet implementation class SimilarProductsController
  */
 @WebServlet("/SimilarProductsController")
 public class SimilarProductsController extends HttpServlet {

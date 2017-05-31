@@ -60,16 +60,14 @@
     <servlet-name>SalesController</servlet-name>
     <url-pattern>/SalesController</url-pattern>
   </servlet-mapping>
-  
-<!--   <servlet>
-    <servlet-name>SimilarProductsController</servlet-name>
+  <servlet>
+    <servlet-name>SimProductsController</servlet-name>
     <servlet-class>ucsd.shoppingApp.controllers.SimilarProductsController</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>SimilarProductsController</servlet-name>
-    <url-pattern>/SimilarProductsController</url-pattern>
-  </servlet-mapping> -->
-  
+    <servlet-name>SimProductsController</servlet-name>
+    <url-pattern>/SimProductsController</url-pattern>
+  </servlet-mapping>  
   <resource-ref>
     <description>DB Connection</description>
     <res-ref-name>jdbc/shoppingAppDB</res-ref-name>
