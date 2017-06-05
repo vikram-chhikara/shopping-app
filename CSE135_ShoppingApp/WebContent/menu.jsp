@@ -20,6 +20,7 @@
 		<!-- <li><a href='#'>Product Order</a></li> -->
 		<li><a href='./BuyController'>Buy Shopping Cart</a></li>
 		<li><a href='./SimProductsController?refresh=1'>Similar Products</a></li>
+		<li><a href='./buyOrders'>Buy Orders</a></li>
 	<% } %>
 </ul>
 </body>

@@ -68,7 +68,16 @@
   <servlet-mapping>
     <servlet-name>SimProductsController</servlet-name>
     <url-pattern>/SimProductsController</url-pattern>
-  </servlet-mapping>  
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>buyOrders</servlet-name>
+    <jsp-file>/buyOrders.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>buyOrders</servlet-name>
+    <url-pattern>/buyOrders</url-pattern>
+  </servlet-mapping> 
 
   <resource-ref>
     <description>DB Connection</description>
