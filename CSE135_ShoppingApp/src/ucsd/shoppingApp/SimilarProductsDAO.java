@@ -14,18 +14,16 @@ import ucsd.shoppingApp.models.SimilarProductsModel;
 
 public class SimilarProductsDAO {
 	private Connection con;
-	private static String GET_SIMILARITY = "(WITH subquery AS( "
-			+ "SELECT pr.id as prod_id, pr.product_name, p.id as person_id, p.person_name, SUM(pi.price*pi.quantity) as price "
-			+ "FROM (person p JOIN shopping_cart s on  p.id = s.person_id) "
-			+ "JOIN (product pr JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id "
-			+ "GROUP BY pr.id, pr.product_name, p.id,p.person_name ORDER BY pr.product_name), "
-			+ "prodcount AS(SELECT subquery.prod_id, COUNT(subquery.prod_id) AS co FROM subquery GROUP BY prod_id) "
-			+ "SELECT q1.prod_id as id_1, q1.product_name as p1, q2.prod_id as id_2, q2.product_name as p2, "
-			+ "(SUM(q1.price*q2.price)/(prodc.co*prodoc.co)) as Cosine_Similarity, prodc.co, prodoc.co "
-			+ "FROM subquery q1 JOIN subquery q2 on q1.person_id = q2.person_id, prodcount prodc, prodcount prodoc "
-			+ "WHERE q1.prod_id < q2.prod_id AND prodc.prod_id = q1.prod_id AND prodoc.prod_id = q2.prod_id "
-			+ "GROUP BY  q1.prod_id, q1.product_name, q2.prod_id, q2.product_name, prodc.co, prodoc.co "
-			+ "ORDER BY Cosine_Similarity desc LIMIT 100)";
+	private static String GET_SIMILARITY = "WITH SALES AS (select pc.product_id, p.product_name, sc.person_id,sum(pc.price*pc.quantity) as amount "
+			+ "from products_in_cart pc inner join shopping_cart sc on (sc.id = pc.cart_id and sc.is_purchased = true), product p "
+			+ "where pc.product_id = p.id group by pc.product_id,sc.person_id,p.product_name), "
+			+ "DENOM AS (SELECT product_id, SUM(amount) as denom_sums FROM SALES GROUP BY product_id) "
+			+ "SELECT s1.product_id AS id_1, s1.product_name as p1, s2.product_id AS id_2, s2.product_name AS p2, "
+			+ "(SUM (s1.amount*s2.amount)/(d1.denom_sums * d2.denom_sums)) as val "
+			+ "FROM SALES s1 JOIN SALES s2 ON (s1.product_id < s2.product_id), DENOM d1, DENOM d2 "
+			+ "WHERE s1.person_id = s2.person_id AND d1.product_id = s1.product_id AND d2.product_id = s2.product_id "
+			+ "GROUP BY (s1.product_id,s1.product_name, s2.product_id, s2.product_name,d1.denom_sums, d2.denom_sums) "
+			+ "ORDER BY val desc LIMIT 100";
 	
 	public SimilarProductsDAO(Connection con) {
 		this.con = con;
@@ -51,7 +49,7 @@ public class SimilarProductsDAO {
 			while (rs.next()) {
 				prod1 = rs.getString("p1");
 				prod2 = rs.getString("p2");
-				pri = rs.getDouble("Cosine_Similarity");
+				pri = rs.getDouble("val");
 				
 				SimilarProductsModel a = new SimilarProductsModel(prod1,prod2,pri);
 				table.add(a);
