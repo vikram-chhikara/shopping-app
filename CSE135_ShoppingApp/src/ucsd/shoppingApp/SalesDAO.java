@@ -23,7 +23,7 @@ public class SalesDAO {
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 20 OFFSET ?";
+			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 50 OFFSET ?";
 	private static final String GET_PEOPLE_ALPHA = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
 			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
 			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON "

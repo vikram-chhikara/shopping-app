@@ -25,10 +25,7 @@
 		
 		//basic default
 		if(session.getAttribute("rowChoice") == null) {
-			session.setAttribute("rowChoice", "states");
-		}
-		if(session.getAttribute("orderChoice") == null) {
-			session.setAttribute("orderChoice", "t");
+			session.setAttribute("rowChoice", "customers");
 		}
 	%>
 	
@@ -44,6 +41,14 @@
 					<%
 						if(session.getAttribute("nextClick") == null || Integer.parseInt(session.getAttribute("nextClick").toString()) == 0) {
 					%>
+			   			Row: <select name="rowChoice">
+			  				<option value="customers">Customers</option>
+			  				<option value="states" <%if((session.getAttribute("rowChoice") != null) && (session.getAttribute("rowChoice")).equals("states")) { %> selected <% } %>>States</option>
+						</select>
+						Order: 	<select name="orderChoice">
+			  				<option value="a">Alphabetical</option>
+			  				<option value="t" <%if((session.getAttribute("orderChoice") != null) && (session.getAttribute("orderChoice")).equals("t")) { %> selected <% } %>>Top-K</option>
+						</select>
 						<input type="Submit" value="Run Query"></input> </p>
 						<!-- Sales Filtering Options -->
 						Category Filter: <select name="catFilter">
@@ -161,7 +166,7 @@
 				<% } 
 				if(rowNames.size() > 0) {
 				%>
-				<!-- input type="Submit" name="nextRow" value="Next 20 states"></input -->
+				<input type="Submit" name="nextRow" value="Next 20 <%=session.getAttribute("rowChoice").toString()%>"></input>
 				<%} %>
 				</form>
 			<%

@@ -79,11 +79,8 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//keep track of row values and sorting methods/filters
 		if(request.getSession().getAttribute("nextClick") == null || Integer.parseInt(request.getSession().getAttribute("nextClick").toString()) == 0) {
-			row = request.getParameter("rowChoice");
-			request.getSession().setAttribute("rowChoice", row);
-			
-			sort = request.getParameter("orderChoice");
-			request.getSession().setAttribute("orderChoice", sort);
+			row = "states";			
+			sort = "t";
 			
 			if(request.getParameter("catFilter") != null) {
 				cat = Integer.parseInt(request.getParameter("catFilter"));

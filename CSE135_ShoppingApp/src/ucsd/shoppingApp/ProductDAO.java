@@ -26,12 +26,12 @@ public class ProductDAO {
 	private static final String SELECT_PRODUCTS_TOP_K = "SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY price DESC LIMIT 10 OFFSET ?";
+			+ "ORDER BY price DESC LIMIT 50 OFFSET ?";
 	//products filtered by category order by price
 	private static final String SELECT_PRODUCTS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
 			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
 			+ "GROUP BY product_name, pr.price "
-			+ "ORDER BY price DESC LIMIT 10 OFFSET ?";
+			+ "ORDER BY price DESC LIMIT 50 OFFSET ?";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
