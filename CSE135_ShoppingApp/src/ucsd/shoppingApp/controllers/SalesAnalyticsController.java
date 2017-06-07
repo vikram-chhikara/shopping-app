@@ -58,8 +58,8 @@ public class SalesAnalyticsController extends HttpServlet {
 		
 		//Refresh page if linked from menu
 		if(request.getParameter("clean") != null && Integer.parseInt(request.getParameter("clean")) == 1) {
-			request.getSession().setAttribute("rowChoice", "customers");
-			request.getSession().setAttribute("orderChoice", "a");
+			request.getSession().setAttribute("rowChoice", "states");
+			request.getSession().setAttribute("orderChoice", "t");
 			request.getSession().setAttribute("catFilter", 0);
 			request.getSession().setAttribute("pageCount", 0);
 			request.getSession().setAttribute("columnCount", 0);
@@ -70,6 +70,8 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.setAttribute("clean", 0);
 			request.getRequestDispatcher(forward).forward(request, response);
 			return;
+		} else if(request.getParameter("clean") != null && Integer.parseInt(request.getParameter("clean")) == 2) {
+			//Do Non-full refresh
 		}
 
 		//check dropdown menu(s)

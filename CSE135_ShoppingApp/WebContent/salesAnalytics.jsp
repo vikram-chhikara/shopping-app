@@ -66,7 +66,8 @@
 			
 			<!-- Table ordered and sorted as required -->
 			<table style="border-collapse:collapse;" width="100%">
-				<tr style="border:1px solid black;" > <td></td>
+				<tr style="border:1px solid black;" >
+				<td sytle="border:none;"> <a href='./SimProductsController?refresh=2'>Refresh</a> </td>
 				<%
 				//Get table values
 				HashMap<String, HashMap<String, Double>> an;
@@ -104,13 +105,18 @@
 					%>
 					<td style="border:1px solid black; font-weight:bold"><%=curProd %></td>
 					<%
+					if(i == prodNames.size() - 1) {
+						%>
+						<td><a href='./SimProductsController?refresh=2'>Refresh</a></td>
+						<%
+					}
 				}
-				%>
-				<%
+
 				HashMap<String, Double> prodpri;
 				String currRow = "";
 				String rowVal = "(0.0)";
 				Double pri = 0.0;
+				
 				
 				for(int i = 0; i < rowNames.size(); i++) {
 					currRow = rowNames.get(i).getRowName();
@@ -138,12 +144,16 @@
 								<%
 							}
 						}
+					if(i == rowNames.size() - 1) {
 					%>
+						<td><a href='./SimProductsController?refresh=2'>Refresh</a></td>
+					<%} %>
 					</tr>
 					<%
 				}
 			%>
 			</table>
+			<a href='./SimProductsController?refresh=2'>Refresh</a>
 			<%
 			if((session.getAttribute("orderChoice") != null)) {
 				int pagecount = 0;
