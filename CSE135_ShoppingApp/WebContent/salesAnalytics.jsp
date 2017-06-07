@@ -8,6 +8,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Sales Analytics</title>
+	<!-- Style and JS stuff -->
+	<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+    <style type="text/css">
+    .colorRed{
+        color:red;
+    }
+    .colorPurple{
+        color:purple;
+    }
+    </style>
 </head>
 <body>
 <%
@@ -66,9 +77,9 @@
 		</table>
 			
 			<!-- Table ordered and sorted as required -->
-			<table style="border-collapse:collapse;" width="100%">
+			<table id="testtable" style="border-collapse:collapse;" width="100%">
 				<tr style="border:1px solid black;" >
-				<td sytle="border:none;"> <a href='./SimProductsController?refresh=2'>Refresh</a> </td>
+				<td sytle="border:none;"> <button onclick="toggler(this);">Refresh</button> </td>
 				<%
 				//Get table values
 				HashMap<String, HashMap<String, Double>> an;
@@ -108,7 +119,7 @@
 					<%
 					if(i == prodNames.size() - 1) {
 						%>
-						<td><a href='./SimProductsController?refresh=2'>Refresh</a></td>
+						<td> <button onclick="toggler(this);">Refresh</button> </td>
 						<%
 					}
 				}
@@ -117,7 +128,6 @@
 				String currRow = "";
 				String rowVal = "(0.0)";
 				Double pri = 0.0;
-				
 				
 				for(int i = 0; i < rowNames.size(); i++) {
 					currRow = rowNames.get(i).getRowName();
@@ -147,25 +157,15 @@
 						}
 					if(i == rowNames.size() - 1) {
 					%>
-						<td><a href='./SimProductsController?refresh=2'>Refresh</a></td>
+						<td><button onclick="toggler(this);">Refresh</button></td>
 					<%} %>
 					</tr>
 					<%
 				}
 			%>
 			</table>
-			<a href='./SimProductsController?refresh=2'>Refresh</a>
+			<button onclick="toggler(this);">Refresh</button>
 			<%
-			if((session.getAttribute("orderChoice") != null)) {
-				int pagecount = 0;
-				int columncnt = 0;
-				if(session.getAttribute("pageCount") == null) {
-					session.setAttribute("pageCount", 0);
-				}
-				if(session.getAttribute("columnCount") == null) {
-					session.setAttribute("columnCount", 0);
-				}
-			}
 		}
 		else { %>
 			<h3>This page is available to owners only</h3>
@@ -179,5 +179,6 @@
 	    long deltaTime = System.nanoTime() - startTime;
 	    System.out.println("Time: " + (deltaTime/1000000));
 	%>
+	<script type="text/javascript" src="./salesRefresh.js"></script>
 </body>
 </html>
