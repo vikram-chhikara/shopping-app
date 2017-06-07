@@ -59,6 +59,7 @@
 						}
 							%>
 						</select>
+						</form>
 				</td>
 			</tr>
 			
@@ -164,17 +165,6 @@
 				if(session.getAttribute("columnCount") == null) {
 					session.setAttribute("columnCount", 0);
 				}
-				
-				if(prodNames.size() > 0) {
-			%>
-				<input type="Submit" name="nextCol" value="Next 10 Products"></input>
-				<% } 
-				if(rowNames.size() > 0) {
-				%>
-				<!-- input type="Submit" name="nextRow" value="Next 20 states"></input -->
-				<%} %>
-				</form>
-			<%
 			}
 		}
 		else { %>
