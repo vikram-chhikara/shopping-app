@@ -23,15 +23,20 @@ public class ProductDAO {
 			+ "GROUP BY product_name, pr.price "
 			+ "ORDER BY product_name LIMIT 10 OFFSET ?";
 	//Top value ordering by price used for sales analysis
-	private static final String SELECT_PRODUCTS_TOP_K = "SELECT product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
+	private static final String SELECT_PRODUCTS_TOP_K = "SELECT p.id as product_id, product_name, COALESCE(SUM(pr.price*quantity), 0) as price "
 			+ "FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id "
-			+ "GROUP BY product_name, pr.price "
+			+ "GROUP BY product_name, pr.price, p.id "
 			+ "ORDER BY price DESC LIMIT 50 OFFSET ?";
 	//products filtered by category order by price
-	private static final String SELECT_PRODUCTS_BY_CAT = "SELECT product_name, SUM(pr.price*quantity) as price "
+	private static final String SELECT_PRODUCTS_BY_CAT = "SELECT p.id as product_id, product_name, SUM(pr.price*quantity) as price "
 			+ "FROM product p JOIN products_in_cart pr ON p.id = pr.product_id AND category_id = ? "
-			+ "GROUP BY product_name, pr.price "
+			+ "GROUP BY product_name, pr.price, p.id "
 			+ "ORDER BY price DESC LIMIT 50 OFFSET ?";
+	
+	/** Project 3 Queries */
+	private static final String SELECT_PRECOMP_PRODUCTS_TOP_K = "SELECT * FROM Products_Precomputed";
+	
+	private static final String SELECT_PRECOMP_PRODUCTS_BY_CAT = "SELECT * FROM (Products_Precomputed pp JOIN product p ON p.id = pp.product_id) WHERE p.category_id = ?";
 
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
@@ -54,6 +59,58 @@ public class ProductDAO {
 
 	public ProductDAO(Connection con) {
 		this.con = con;
+	}
+	
+	/** Project Part 3 **/
+	public ArrayList<AnalyticsModel> getPrecomputedProdList(int cat) throws SQLException {
+		long tableTime = System.nanoTime();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
+		
+		try {
+			if(cat == 0) {
+				pstmt = con.prepareStatement(SELECT_PRECOMP_PRODUCTS_TOP_K);
+			} else {
+				pstmt = con.prepareStatement(SELECT_PRECOMP_PRODUCTS_BY_CAT);
+				pstmt.setInt(1, cat);
+			}
+				
+			AnalyticsModel am;
+			String prod;
+			Double pri;
+			int amID;
+			
+			rs = pstmt.executeQuery();
+
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
+			while (rs.next()) {
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				amID = rs.getInt("product_id");
+				
+				am = new AnalyticsModel(prod, prod, pri, amID);
+				result.add(am);
+			}
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			con.rollback();
+			throw e;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	/** Get valid products **/
@@ -87,6 +144,7 @@ public class ProductDAO {
 			AnalyticsModel am;
 			String prod;
 			Double pri;
+			int amID;
 			
 			rs = pstmt.executeQuery();
 
@@ -96,8 +154,9 @@ public class ProductDAO {
 			while (rs.next()) {
 				prod = rs.getString("product_name");
 				pri = rs.getDouble("price");
+				amID = rs.getInt("product_id");
 				
-				am = new AnalyticsModel(prod, prod, pri);
+				am = new AnalyticsModel(prod, prod, pri, amID);
 				result.add(am);
 			}
 			return result;

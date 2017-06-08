@@ -12,18 +12,18 @@ import ucsd.shoppingApp.models.AnalyticsModel;
 
 public class SalesDAO {
 	/* Get row names */
-	private static String GET_STATES_ALPHA = "SELECT tot.state_name, SUM(tot.price) AS price "
-			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
+	private static String GET_STATES_ALPHA = "SELECT state_id, tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.id as state_id, s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY tot.state_name LIMIT 20 OFFSET ?";
-	private static String GET_STATES_TOP = "SELECT tot.state_name, SUM(tot.price) AS price "
-			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
+			+ "GROUP BY tot.state_name, state_id ORDER BY tot.state_name LIMIT 20 OFFSET ?";
+	private static String GET_STATES_TOP = "SELECT state_id, tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.id as state_id, s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 50 OFFSET ?";
+			+ "GROUP BY tot.state_name, state_id ORDER BY price DESC LIMIT 50 OFFSET ?";
 	private static final String GET_PEOPLE_ALPHA = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
 			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
 			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON "
@@ -34,14 +34,16 @@ public class SalesDAO {
 			+ "LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi "
 			+ "ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name "
 			+ "ORDER BY price DESC LIMIT 20 OFFSET ?";
+	//Project Part 3
+	private static final String GET_PRECOMP_STATES = "SELECT * FROM State_Precomputed";
 	
 	/* Get row names with extra category filter */
-	private static String GET_STATES_TOP_FILTER = "SELECT tot.state_name, SUM(tot.price) AS price "
-			+ "FROM (SELECT s.state_name, COALESCE((pr.price * quantity), 0) AS price "
+	private static String GET_STATES_TOP_FILTER = "SELECT state_id, tot.state_name, SUM(tot.price) AS price "
+			+ "FROM (SELECT s.id as state_id, s.state_name, COALESCE((pr.price * quantity), 0) AS price "
 			+ "FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN "
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id AND category_id = ?) ON p.id = person_id) as tot "
-			+ "GROUP BY tot.state_name ORDER BY price DESC LIMIT 50 OFFSET ?";
+			+ "GROUP BY tot.state_name, state_id ORDER BY price DESC LIMIT 50 OFFSET ?";
 	private static String GET_CUST_TOP_FILTER = "SELECT p.id, p.person_name, COALESCE(SUM(pi.price*pi.quantity),0) as price "
 			+ "FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) "
 			+ "LEFT OUTER JOIN (product pr JOIN products_in_cart pi "
@@ -60,6 +62,8 @@ public class SalesDAO {
 			+ "ON pr.id = pi.product_id AND category_id = ?) on s.id = pi.cart_id "
 			+ "GROUP BY p.id, p.person_name "
 			+ "ORDER BY person_name LIMIT 20 OFFSET ?";
+	//Project Part 3
+	private static String GET_PRECOMP_STATES_CAT = "";
 	
 	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
@@ -80,6 +84,58 @@ public class SalesDAO {
 		this.con = con;
 	}
 
+	/** Project Part 3*/
+	public ArrayList<AnalyticsModel> getStateList(int cat) {
+		//timing
+		long tableTime = System.nanoTime();
+		ArrayList<AnalyticsModel> table = new ArrayList<AnalyticsModel>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String row = "";
+		String prod = "";
+		Double pri = 0.0;
+		int amID = 0;
+		
+		try {
+			if(cat == 0) {
+				pstmt = con.prepareStatement(GET_PRECOMP_STATES);
+			}
+			else {
+				pstmt = con.prepareStatement(GET_PRECOMP_STATES_CAT);
+				pstmt.setInt(1, cat);
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
+			while (rs.next()) {
+				row = rs.getString("state_name");
+				pri = rs.getDouble("price");
+				amID = rs.getInt("state_id");
+				
+				AnalyticsModel a = new AnalyticsModel(row,prod,pri, amID);
+				table.add(a);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return table;
+	}
+	
 	/** List of states for row ordering */
 	public ArrayList<AnalyticsModel> getStateList(String o, int off, int cat) {
 		//timing
@@ -91,6 +147,7 @@ public class SalesDAO {
 		String row = "";
 		String prod = "";
 		Double pri = 0.0;
+		int amID = 0;
 		
 		try {
 			if(o.equals("t")) {
@@ -123,8 +180,9 @@ public class SalesDAO {
 			while (rs.next()) {
 				row = rs.getString("state_name");
 				pri = rs.getDouble("price");
+				amID = rs.getInt("state_id");
 				
-				AnalyticsModel a = new AnalyticsModel(row,prod,pri);
+				AnalyticsModel a = new AnalyticsModel(row,prod,pri, amID);
 				table.add(a);
 			}
 		} catch (Exception e) {
@@ -145,6 +203,7 @@ public class SalesDAO {
 	}
 	
 	/** List of customers for row ordering */
+	/*
 	public ArrayList<AnalyticsModel> getPersonList(String o, int off, int cat) {
 		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;
@@ -212,6 +271,7 @@ public class SalesDAO {
 		}
 		return result;
 	}
+	*/
 	
 	/** List people or state and associated prices per product */
 	public HashMap<String, HashMap<String, Double>> getTable(String type, int cat) {

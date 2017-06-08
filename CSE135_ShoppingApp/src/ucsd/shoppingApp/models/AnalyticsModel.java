@@ -1,19 +1,19 @@
 package ucsd.shoppingApp.models;
 
-import java.util.ArrayList;
-
 public class AnalyticsModel {
 	private String rowName;
 	private String product;
 	private double price;
+	private int ID;
 
 	public AnalyticsModel(){
 	}
 	
-	public AnalyticsModel(String rName, String prod, double pri) {
+	public AnalyticsModel(String rName, String prod, double pri, int id) {
 		this.rowName = rName;
 		this.product = prod;
 		this.price = pri;
+		this.ID = id;
 	}
 
 	public String getRowName() {
@@ -40,21 +40,12 @@ public class AnalyticsModel {
 		this.price = price;
 	}
 	
-	public static ArrayList<AnalyticsModel> moveNull(ArrayList<AnalyticsModel> am) {
-		AnalyticsModel aMove;
-		
-		int r_size = am.size();
-		for(int amove = 0, a = 0; amove < r_size && a < r_size; amove++, a++) {
-			aMove = am.get(amove);
-			if(aMove.getPrice() != 0.0) {
-				break;
-			}
-			am.remove(amove);
-			am.add(aMove);
-			amove--;
-		}
-		
-		return am;
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int id) {
+		this.ID = id;
 	}
 
 	@Override

@@ -37,7 +37,7 @@
 					int noOfRows = 0;
 					int productId = 0;
 					int productPrice = 0;
-					int quantity = 0;			
+					int quantity = 0;
 					PreparedStatement shoppingCartPtst = null, productsCartPtst  = null;
 					Statement personSt = null, productSt = null;
 					ArrayList<Integer> cartIds = new ArrayList<Integer>();

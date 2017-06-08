@@ -65,7 +65,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getSession().setAttribute("orderChoice", "t");
 			request.getSession().setAttribute("catFilter", 0);
 			
-			//check dropdown menu(s)
+			//set sorting vals
 			String row = "states";
 			String sort = "t";
 			int cat;
@@ -85,16 +85,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			}
 			
 			int pagecount = 0;
-			//page count for row display
-			if(request.getSession().getAttribute("pageCount") != null) {
-				String pc = request.getSession().getAttribute("pageCount").toString();
-				pagecount = Integer.parseInt(pc);
-				if(request.getParameter("nextRow") != null) {
-					pagecount++;
-					request.getSession().setAttribute("nextClick", 1);
-				}
-				request.getSession().setAttribute("pageCount", pagecount);
-			}
+			//page count default 0
 			
 			//col count for column display
 			int colcount = 0;
@@ -123,11 +114,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			//Get row list 
 			ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
 			Connection conn = null;
-			if(row == null || row.equals("customers")) {
-				rowList = aDB.getPersonList(sort, pagecount, cat);
-			} else {
-				rowList = aDB.getStateList(sort, pagecount, cat);
-			}
+			rowList = aDB.getStateList(sort, pagecount, cat);
 			request.getSession().setAttribute("rowList", rowList);
 
 			//and product list
@@ -136,7 +123,8 @@ public class SalesAnalyticsController extends HttpServlet {
 				conn = ConnectionManager.getConnection();
 				ProductDAO prodDB = new ProductDAO(conn);
 				
-				colList = prodDB.getProductList(sort, cat, colcount);
+				//colList = prodDB.getProductList(sort, cat, colcount);
+				colList = prodDB.getPrecomputedProdList(cat);
 				request.getSession().setAttribute("prodList", colList);
 			}
 			catch(SQLException e) {

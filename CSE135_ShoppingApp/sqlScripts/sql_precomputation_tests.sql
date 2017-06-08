@@ -9,12 +9,13 @@ INSERT INTO State_Precomputed(SELECT tot.state_id, tot.state_name, SUM(tot.price
 			FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN
 			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id)
 			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
-            GROUP BY tot.state_id, tot.state_name ORDER BY price DESC LIMIT 50);
+            GROUP BY tot.state_id, tot.state_name ORDER BY price DESC);
 
 ALTER TABLE State_Precomputed add column id SERIAL PRIMARY KEY;
 
 SELECT * FROM State_Precomputed
 
+DROP TABLE Products_Precomputed;
 CREATE TABLE Products_Precomputed (
 product_id INTEGER NOT NULL,
 product_name TEXT NOT NULL,
@@ -23,11 +24,12 @@ price REAL NOT NULL CHECK(price >= 0.0)
 INSERT INTO Products_Precomputed(SELECT p.id, product_name, COALESCE(SUM(pr.price*quantity), 0) as price
 			FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id
 			GROUP BY p.id, product_name, pr.price
-			ORDER BY price DESC LIMIT 50);
+			ORDER BY price DESC);
 
 ALTER TABLE Products_Precomputed add column id SERIAL PRIMARY KEY;
 SELECT * FROM Products_Precomputed
 
+DROP TABLE States_Products_Precomputed;
 CREATE TABLE States_Products_Precomputed (
 state_id INTEGER NOT NULL,
 state_name TEXT NOT NULL,
@@ -42,7 +44,7 @@ INSERT INTO States_Products_Precomputed(SELECT tot.s_id, tot.state_name,tot.pr_i
 			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id)
 			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
 			GROUP BY tot.s_id, tot.state_name,tot.pr_id, product_name
-            ORDER BY tot.state_name);
+            ORDER BY s_id);
 
 ALTER TABLE States_Products_Precomputed add column id SERIAL PRIMARY KEY;
 

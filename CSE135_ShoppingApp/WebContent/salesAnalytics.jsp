@@ -52,34 +52,29 @@
 					<h3>Hello <%= session.getAttribute("personName") %></h3>
 					<form method="POST" action="SalesController">
 					<p>
-					<%
-						if(session.getAttribute("nextClick") == null || Integer.parseInt(session.getAttribute("nextClick").toString()) == 0) {
-					%>
-						<input type="Submit" value="Run Query"></input> </p>
-						<!-- Sales Filtering Options -->
-						Category Filter: <select name="catFilter">
-							<option value="0" selected>All</option>
-							<%
-							for (CategoryModel cat : category_list) {
-							%>
-							<option value="<%=cat.getId()%>" <%if((session.getAttribute("catFilter") != null) && ((Integer)session.getAttribute("catFilter") == cat.getId())) { %> selected="selected" <%} %>> 
-								<%=cat.getCategoryName()%>
-							</option>
-							<%
-							}
+					<input type="Submit" value="Run Query"></input> </p>
+					<!-- Sales Filtering Options -->
+					Category Filter: <select name="catFilter">
+						<option value="0" selected>All</option>
+						<%
+						for (CategoryModel cat : category_list) {
+						%>
+						<option value="<%=cat.getId()%>" <%if((session.getAttribute("catFilter") != null) && ((Integer)session.getAttribute("catFilter") == cat.getId())) { %> selected="selected" <%} %>> 
+							<%=cat.getCategoryName()%>
+						</option>
+						<%
 						}
-							%>
-						</select>
-						</form>
+						%>
+					</select>
+					</form>
 				</td>
 			</tr>
-			
 		</table>
 			
 			<!-- Table ordered and sorted as required -->
-			<table id="testtable" style="border-collapse:collapse;" width="100%">
-				<tr style="border:1px solid black;" >
-				<td sytle="border:none;"> <button onclick="toggler(this);">Refresh</button> </td>
+			<table id="salestable" style="border-collapse:collapse;" width="100%">
+				<tr id="productsrow" style="border:1px solid black;" >
+				<td sytle="border:none;"> <button onclick="refreshTable(this);">Refresh</button> </td>
 				<%
 				//Get table values
 				HashMap<String, HashMap<String, Double>> an;
@@ -108,18 +103,19 @@
 					prodNames = new ArrayList<AnalyticsModel>();
 				}
 				
-				String curProd;
+				String curProd, prodRefID;
 				AnalyticsModel prodRef;
 				/* Start with product list */
 				for(int i = 0; i < prodNames.size(); i++) {
 					prodRef = prodNames.get(i);
 					curProd = prodRef.getProduct() + "\n (" + prodRef.getPrice() + ")";
+					prodRefID = "prodtitle" + prodRef.getID();
 					%>
-					<td style="border:1px solid black; font-weight:bold"><%=curProd %></td>
+					<td id=<%=prodRefID%> style="border:1px solid black; font-weight:bold"><%=curProd %></td>
 					<%
 					if(i == prodNames.size() - 1) {
 						%>
-						<td> <button onclick="toggler(this);">Refresh</button> </td>
+						<td> <button onclick="refreshTable(this);">Refresh</button> </td>
 						<%
 					}
 				}
@@ -157,14 +153,14 @@
 						}
 					if(i == rowNames.size() - 1) {
 					%>
-						<td><button onclick="toggler(this);">Refresh</button></td>
+						<td><button onclick="refreshTable(this);">Refresh</button></td>
 					<%} %>
 					</tr>
 					<%
 				}
 			%>
 			</table>
-			<button onclick="toggler(this);">Refresh</button>
+			<button onclick="refreshTable(this);">Refresh</button>
 			<%
 		}
 		else { %>
