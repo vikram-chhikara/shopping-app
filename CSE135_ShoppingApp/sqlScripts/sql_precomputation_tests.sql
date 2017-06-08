@@ -1,66 +1,49 @@
-/*Create shopping cart for each customer*/
-INSERT INTO shopping_cart (person_id,is_purchased) VALUES (2,True) ;
-INSERT INTO shopping_cart (person_id,is_purchased) VALUES (3,True) ;
-INSERT INTO shopping_cart (person_id,is_purchased) VALUES (4,True) ;
+DROP TABLE Products_Precomputed;
+CREATE TABLE State_Precomputed (
+state_id INTEGER NOT NULL,
+state_name TEXT NOT NULL,
+price REAL NOT NULL CHECK(price >= 0.0)
+);
+INSERT INTO State_Precomputed(SELECT tot.state_id, tot.state_name, SUM(tot.price) AS price
+			FROM (SELECT s.id AS state_id, s.state_name, COALESCE((pr.price * quantity), 0) AS price
+			FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN
+			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id)
+			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
+            GROUP BY tot.state_id, tot.state_name ORDER BY price DESC LIMIT 50);
 
-/*Fill each customer's cart with their purchased products*/
-/*For bob; nike boost shoe, mac and adi shirt*/
-TRUNCATE TABLE products_in_cart;
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (1,1,25,1) ;
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (1,2,8.99,1) ;
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (1,3,980,1) ;
-/*for raj; alienware and aldo shoe*/
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (2,4,789,1) ;
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (2,6,100,1) ;
-/*for steven; shirt and dell*/
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (3,8,40,1) ;
-INSERT INTO products_in_cart (cart_id,product_id,price,quantity) VALUES (3,5,346,1) ;
+ALTER TABLE State_Precomputed add column id SERIAL PRIMARY KEY;
 
-/*Precompute table*/
-CREATE TABLE Purchase_Precomputed (
-id SERIAL PRIMARY KEY,
-person_name TEXT NOT NULL,
+SELECT * FROM State_Precomputed
+
+CREATE TABLE Products_Precomputed (
+product_id INTEGER NOT NULL,
+product_name TEXT NOT NULL,
+price REAL NOT NULL CHECK(price >= 0.0)
+);
+INSERT INTO Products_Precomputed(SELECT p.id, product_name, COALESCE(SUM(pr.price*quantity), 0) as price
+			FROM product p LEFT OUTER JOIN products_in_cart pr ON p.id = pr.product_id
+			GROUP BY p.id, product_name, pr.price
+			ORDER BY price DESC LIMIT 50);
+
+ALTER TABLE Products_Precomputed add column id SERIAL PRIMARY KEY;
+SELECT * FROM Products_Precomputed
+
+CREATE TABLE States_Products_Precomputed (
+state_id INTEGER NOT NULL,
+state_name TEXT NOT NULL,
+product_id INTEGER NOT NULL,
 product_name TEXT NOT NULL,
 price REAL NOT NULL CHECK(price >= 0.0)
 );
 
-INSERT INTO Purchase_Precomputed(SELECT p.person_name, pr.product_name, pi.price
-FROM person p, product pr, shopping_cart s, products_in_cart pi
-WHERE p.id = s.person_id and s.id = pi.cart_id and pr.id = pi.product_id
-ORDER BY p.person_name);
+INSERT INTO States_Products_Precomputed(SELECT tot.s_id, tot.state_name,tot.pr_id, product_name, SUM(tot.price) as price
+			FROM (SELECT s.id as s_id, s.state_name, pr.id as pr_id, pr.product_name, (pr.price * quantity) AS price
+			FROM (state s JOIN person p ON p.state_id = s.id) JOIN
+			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id)
+			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
+			GROUP BY tot.s_id, tot.state_name,tot.pr_id, product_name
+            ORDER BY tot.state_name);
 
-/*Gives quantity of each product*/
-SELECT t.person_name, t.product_name, t.price, COUNT(t.product_name) AS Quanatity
-FROM
-(SELECT p.person_name, pr.product_name, pi.price
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-ORDER BY p.person_name) t
-GROUP BY t.person_name, t.product_name, t.price
-ORDER BY t.person_name
+ALTER TABLE States_Products_Precomputed add column id SERIAL PRIMARY KEY;
 
-/*Above query using precomputation*/
-SELECT t.person_name, t.product_name, t.price, COUNT(t.product_name) AS Quanatity
-FROM Purchase_Precomputed t
-GROUP BY t.person_name, t.product_name, t.price
-ORDER BY t.person_name
-
-/*Query that gives sum total spent by each customer */
-SELECT t.person_name, SUM(t.price) AS Total
-FROM
-(SELECT p.person_name, pr.product_name, pi.price
-FROM (person p LEFT OUTER JOIN shopping_cart s on  p.id = s.person_id) LEFT OUTER JOIN (product pr LEFT OUTER JOIN products_in_cart pi ON pr.id = pi.product_id) on s.id = pi.cart_id
-ORDER BY p.person_name) t
-GROUP BY t.person_name
-ORDER BY Total DESC
-
-/*Above query using precomputation*/
-SELECT t.person_name, SUM(t.price) AS Total
-FROM Purchase_Precomputed t
-GROUP BY t.person_name
-ORDER BY Total DESC
-
-/*Total category query using precomputation*/
-SELECT t.category_id, SUM(t.price) AS Category_Sum
-FROM Purchase_Precomputed t
-GROUP BY t.category_id
-ORDER BY Category_Sum desc
+Select * from States_Products_Precomputed;
