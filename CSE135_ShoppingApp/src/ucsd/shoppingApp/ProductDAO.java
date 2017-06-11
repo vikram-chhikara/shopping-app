@@ -36,8 +36,9 @@ public class ProductDAO {
 	/** Project 3 Queries */
 	private static final String SELECT_PRECOMP_PRODUCTS_TOP_K = "SELECT * FROM Products_Precomputed";
 	
-	private static final String SELECT_PRECOMP_PRODUCTS_BY_CAT = "SELECT * FROM (Products_Precomputed pp JOIN product p ON p.id = pp.product_id) WHERE p.category_id = ?";
+	private static final String SELECT_PRECOMP_PRODUCTS_BY_CAT = "SELECT * FROM Products_Precomputed pp WHERE category_id = ?";
 
+	/** Provided Queries */
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "
 			+ "(sku_id, product_name, price, category_id, created_by) " + "VALUES (?, ?, ?, ?, ?)";
 

@@ -1,3 +1,3 @@
 var refreshTable = function (obj){
-    $("#prodtitle58").toggleClass("colorRed");
+    $("#prodtitle155").toggleClass("colorRed");
 }

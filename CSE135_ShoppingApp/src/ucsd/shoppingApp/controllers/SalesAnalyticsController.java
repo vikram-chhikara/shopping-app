@@ -79,8 +79,6 @@ public class SalesAnalyticsController extends HttpServlet {
 				}
 				request.getSession().setAttribute("catFilter", cat);
 			} else {
-				row = request.getSession().getAttribute("rowChoice").toString();
-				sort = request.getSession().getAttribute("orderChoice").toString();
 				cat = Integer.parseInt(request.getSession().getAttribute("catFilter").toString());
 			}
 			
@@ -101,20 +99,13 @@ public class SalesAnalyticsController extends HttpServlet {
 			}
 			
 			//get Table
-			if(row.equals("customers")) {
-				tableVals = aDB.getTable("person", 0);
-			} else if (row.equals("states")) {
-				tableVals = aDB.getTable("state", cat);
-			}
-			else {
-				tableVals = new HashMap<String, HashMap<String, Double>>();
-			}
+			tableVals = aDB.getLimitedTable(cat);
 			request.getSession().setAttribute("alist", tableVals);
 			
 			//Get row list 
 			ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
 			Connection conn = null;
-			rowList = aDB.getStateList(sort, pagecount, cat);
+			rowList = aDB.getStateList(cat);
 			request.getSession().setAttribute("rowList", rowList);
 
 			//and product list
@@ -123,7 +114,6 @@ public class SalesAnalyticsController extends HttpServlet {
 				conn = ConnectionManager.getConnection();
 				ProductDAO prodDB = new ProductDAO(conn);
 				
-				//colList = prodDB.getProductList(sort, cat, colcount);
 				colList = prodDB.getPrecomputedProdList(cat);
 				request.getSession().setAttribute("prodList", colList);
 			}

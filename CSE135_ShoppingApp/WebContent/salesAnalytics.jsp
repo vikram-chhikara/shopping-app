@@ -26,9 +26,9 @@
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
-	%> 
-	<!-- Sales Filtering Category List -->
-	<%
+		%> 
+		<!-- Sales Filtering Category List -->
+		<%
 		Connection con = ConnectionManager.getConnection();	
 		CategoryDAO categoryDao = new CategoryDAO(con);
 		List<CategoryModel> category_list = categoryDao.getCategories();
@@ -103,38 +103,43 @@
 					prodNames = new ArrayList<AnalyticsModel>();
 				}
 				
-				String curProd, prodRefID;
-				AnalyticsModel prodRef;
+				String curProd, curProdPrice, prodRefID = "";
+				AnalyticsModel prodRef = null;
 				/* Start with product list */
-				for(int i = 0; i < prodNames.size(); i++) {
+				for(int i = 0; i < 50 && i < prodNames.size(); i++) {
 					prodRef = prodNames.get(i);
-					curProd = prodRef.getProduct() + "\n (" + prodRef.getPrice() + ")";
+					curProd = prodRef.getProduct();
+					curProdPrice = "(" + prodRef.getPrice() + ")";
 					prodRefID = "prodtitle" + prodRef.getID();
 					%>
-					<td id=<%=prodRefID%> style="border:1px solid black; font-weight:bold"><%=curProd %></td>
+					<td style="border:1px solid black; font-weight:bold"><%=curProd%> <p id=<%=prodRefID %>><%=curProdPrice %></p> </td>
 					<%
 					if(i == prodNames.size() - 1) {
 						%>
-						<td> <button onclick="refreshTable(this);">Refresh</button> </td>
+						<td><button onclick="refreshTable(this);">Refresh</button></td>
 						<%
 					}
 				}
-
+				
 				HashMap<String, Double> prodpri;
-				String currRow = "";
+				AnalyticsModel currRow = null;
+				String currRowPrice, rowValID;
 				String rowVal = "(0.0)";
 				Double pri = 0.0;
 				
-				for(int i = 0; i < rowNames.size(); i++) {
-					currRow = rowNames.get(i).getRowName();
-					rowVal = currRow + "\n (" + rowNames.get(i).getPrice() + ")";
+				for(int i = 0; i < 50 && i < rowNames.size(); i++) {
+					currRow = rowNames.get(i);
+					rowVal = currRow.getRowName();
+					currRowPrice = "(" + currRow.getPrice() + ")";
+					rowValID = "rowtitle" + currRow.getID();
+					
 					%>
 					<tr>
-					<td style="border:1px solid black; font-weight:bold"><%=rowVal %></td>
+					<td style="border:1px solid black; font-weight:bold"><%=rowVal %> <p id=<%=rowValID%>><%=currRowPrice%></p></td>
 					<% 
-						for(int j = 0; j < prodNames.size(); j++) {
-							if(an.containsKey(currRow)) {
-								prodpri = an.get(currRow);
+						for(int j = 0; j < 50 && j < prodNames.size(); j++) {
+							if(an.containsKey(rowVal)) {
+								prodpri = an.get(rowVal);
 								if(prodpri.containsKey(prodNames.get(j).getRowName())) {
 									pri = prodpri.get(prodNames.get(j).getRowName());
 									%>
@@ -167,11 +172,10 @@
 			<h3>This page is available to owners only</h3>
 		<%
 		}
-		
 	}
 	else { %>
 			<h3>Please <a href = "./login.jsp">login</a> before viewing the page</h3>
-	<%} 
+	<%}
 	    long deltaTime = System.nanoTime() - startTime;
 	    System.out.println("Time: " + (deltaTime/1000000));
 	%>

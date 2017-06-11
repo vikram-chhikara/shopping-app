@@ -100,3 +100,12 @@ WHERE q1.prod_id < q2.prod_id AND prodc.prod_id = q1.prod_id AND prodoc.prod_id 
 GROUP BY  q1.prod_id, q1.product_name, q2.prod_id, q2.product_name, prodc.co, prodoc.co
 ORDER BY Cosine_Similarity desc
 LIMIT 100)
+
+/* States filtered by category */
+SELECT state_id, tot.state_name, tot.cat_id, SUM(tot.price) AS price 
+			FROM (SELECT s.id as state_id, s.state_name, pr.category_id as cat_id, COALESCE((pr.price * quantity), 0) AS price 
+			FROM (state s LEFT OUTER JOIN person p ON p.state_id = s.id) LEFT OUTER JOIN 
+			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) 
+			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
+            -- WHERE cat_id = ?
+			GROUP BY state_id, tot.cat_id, tot.state_name ORDER BY price DESC

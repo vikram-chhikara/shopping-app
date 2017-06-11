@@ -35,7 +35,8 @@ public class SalesDAO {
 			+ "ON pr.id = pi.product_id) on s.id = pi.cart_id GROUP BY p.id, p.person_name "
 			+ "ORDER BY price DESC LIMIT 20 OFFSET ?";
 	//Project Part 3
-	private static final String GET_PRECOMP_STATES = "SELECT * FROM State_Precomputed";
+	private static final String GET_PRECOMP_STATES = "SELECT state_id, state_name, SUM(price) as price "
+			+ "FROM State_Precomputed GROUP BY state_id, state_name ORDER BY price DESC"; // SELECT * FROM State_Precomputed
 	
 	/* Get row names with extra category filter */
 	private static String GET_STATES_TOP_FILTER = "SELECT state_id, tot.state_name, SUM(tot.price) AS price "
@@ -63,7 +64,7 @@ public class SalesDAO {
 			+ "GROUP BY p.id, p.person_name "
 			+ "ORDER BY person_name LIMIT 20 OFFSET ?";
 	//Project Part 3
-	private static String GET_PRECOMP_STATES_CAT = "";
+	private static String GET_PRECOMP_STATES_CAT = "SELECT * FROM State_Precomputed WHERE category_id = ?";
 	
 	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
@@ -77,6 +78,10 @@ public class SalesDAO {
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name, product_name";
+	private static String GET_LIMITED_TABLE = "Select * FROM States_Products_Precomputed spp "
+			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp LIMIT 50)";
+	private static String GET_CAT_LIMITED_TABLE = "Select * FROM States_Products_Precomputed spp "
+			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp WHERE pp.category_id = ?)";
 	
 	private Connection con;
 
@@ -202,6 +207,69 @@ public class SalesDAO {
 		return table;
 	}
 	
+	/** Precomputed Cell Table */
+	public HashMap<String, HashMap<String, Double>> getLimitedTable(int cat) {
+		long tableTime = System.nanoTime();
+		HashMap<String, HashMap<String, Double>> table = new HashMap<String, HashMap<String, Double>>();
+		HashMap<String, Double> prodpri;
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String row = "";
+		String prod = "";
+		int stateID, prodID;
+		Double pri = 0.0;
+		
+		try {
+			if(cat == 0) {
+					pstmt = con.prepareStatement(GET_LIMITED_TABLE);
+			}
+			else {
+				pstmt = con.prepareStatement(GET_CAT_LIMITED_TABLE);
+				pstmt.setInt(1, cat);
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
+			
+			while (rs.next()) {
+				row = rs.getString("state_name");
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				stateID = rs.getInt("state_id");
+				prodID = rs.getInt("product_id");
+				
+				if(table.containsKey(row)) {
+					table.get(row).put(prod, pri);
+				} else {
+					prodpri = new HashMap<String, Double>();
+					prodpri.put(prod, pri);
+					table.put(row, prodpri);
+				}
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return table;
+	}
+	
 	/** List of customers for row ordering */
 	/*
 	public ArrayList<AnalyticsModel> getPersonList(String o, int off, int cat) {
@@ -272,6 +340,8 @@ public class SalesDAO {
 		return result;
 	}
 	*/
+	
+	
 	
 	/** List people or state and associated prices per product */
 	public HashMap<String, HashMap<String, Double>> getTable(String type, int cat) {
