@@ -34,9 +34,9 @@ public class ProductDAO {
 			+ "ORDER BY price DESC LIMIT 50 OFFSET ?";
 	
 	/** Project 3 Queries */
-	private static final String SELECT_PRECOMP_PRODUCTS_TOP_K = "SELECT * FROM Products_Precomputed";
+	private static final String SELECT_PRECOMP_PRODUCTS_TOP_K = "SELECT * FROM Products_Precomputed ORDER BY price DESC";
 	
-	private static final String SELECT_PRECOMP_PRODUCTS_BY_CAT = "SELECT * FROM Products_Precomputed pp WHERE category_id = ?";
+	private static final String SELECT_PRECOMP_PRODUCTS_BY_CAT = "SELECT * FROM Products_Precomputed pp WHERE category_id = ? ORDER BY price DESC";
 
 	/** Provided Queries */
 	private static final String ADD_PRODUCT_SQL = "INSERT INTO PRODUCT "

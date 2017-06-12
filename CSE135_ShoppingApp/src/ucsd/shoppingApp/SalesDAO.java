@@ -64,7 +64,7 @@ public class SalesDAO {
 			+ "GROUP BY p.id, p.person_name "
 			+ "ORDER BY person_name LIMIT 20 OFFSET ?";
 	//Project Part 3
-	private static String GET_PRECOMP_STATES_CAT = "SELECT * FROM State_Precomputed WHERE category_id = ?";
+	private static String GET_PRECOMP_STATES_CAT = "SELECT * FROM State_Precomputed WHERE category_id = ? ORDER BY price DESC";
 	
 	/* Fill in data */
 	private static String GET_CUST_PRODS = "SELECT p.id, p.person_name, pr.product_name, SUM(pi.price*pi.quantity) as price "
@@ -83,6 +83,10 @@ public class SalesDAO {
 	private static String GET_CAT_LIMITED_TABLE = "Select * FROM States_Products_Precomputed spp "
 			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp WHERE pp.category_id = ?)";
 	
+	/** Log Table Update */
+	private static String USER_REFRESH = "UPDATE logOwner SET last_refresh = (now() AT TIME ZONE 'UTC') WHERE user_id = ?";
+	private static String USER_TIME = "SELECT * FROM logOwner WHERE user_id = ?";
+	
 	private Connection con;
 
 	public SalesDAO(Connection con) {
@@ -90,6 +94,63 @@ public class SalesDAO {
 	}
 
 	/** Project Part 3*/
+	public java.sql.Timestamp lastTimeAndClear(int userid) {
+		java.sql.Timestamp lt = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(USER_TIME);
+			pstmt.setInt(1, userid);
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				lt = rs.getTimestamp("last_refresh");
+			}
+			
+			refresh(userid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return lt;
+	}
+	
+	public void refresh(int userid) {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(USER_REFRESH);
+			pstmt.setInt(1, userid);
+			
+			rs = pstmt.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public ArrayList<AnalyticsModel> getStateList(int cat) {
 		//timing
 		long tableTime = System.nanoTime();

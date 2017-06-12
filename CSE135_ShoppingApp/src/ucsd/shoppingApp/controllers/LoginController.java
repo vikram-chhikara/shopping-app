@@ -43,12 +43,16 @@ public class LoginController extends HttpServlet {
 		// TODO Auto-generated method stub
 		String uname=request.getParameter("username");
 		PrintWriter out = response.getWriter();
+		
+		int userid;
 		try {
 			HttpSession session = request.getSession();
 			session.setAttribute("personName", uname);
 			PersonDAO personDao = new PersonDAO(con);
-			if(personDao.personExists(uname)) {
+			userid = personDao.personID(uname);
+			if(userid != 0) {
 				session.setAttribute("roleName", personDao.getPersonRole(uname));
+				session.setAttribute("login_id", userid);
 		        //session.setAttribute("validUser", "Yes");
 		        response.sendRedirect("home.jsp");
 			}

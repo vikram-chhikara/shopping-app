@@ -3,5 +3,4 @@ var refreshTable = function (obj){
     $("#prodtitle155").toggleClass("colorRed");
     $("#salestable").toggleClass("colorPurple");
     $("#cell17_58").toggleClass("colorRed");
-
 }

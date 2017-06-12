@@ -12,9 +12,8 @@ INSERT INTO State_Precomputed(SELECT state_id, tot.state_name, tot.cat_id, SUM(t
 			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
 			GROUP BY state_id, tot.cat_id, tot.state_name ORDER BY price DESC);
 
-ALTER TABLE State_Precomputed add column id SERIAL PRIMARY KEY;
-
 SELECT * FROM State_Precomputed
+
 
 DROP TABLE Products_Precomputed;
 CREATE TABLE Products_Precomputed (
@@ -28,8 +27,8 @@ INSERT INTO Products_Precomputed(SELECT p.id, product_name, p.category_id, COALE
 			GROUP BY p.id, product_name, pr.price
 			ORDER BY price DESC);
 
-ALTER TABLE Products_Precomputed add column id SERIAL PRIMARY KEY;
 SELECT * FROM Products_Precomputed
+
 
 DROP TABLE States_Products_Precomputed;
 CREATE TABLE States_Products_Precomputed (
@@ -47,7 +46,5 @@ INSERT INTO States_Products_Precomputed(SELECT tot.s_id, tot.state_name,tot.pr_i
 			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
 			GROUP BY tot.s_id, tot.state_name,tot.pr_id, product_name
             ORDER BY s_id);
-
-ALTER TABLE States_Products_Precomputed add column id SERIAL PRIMARY KEY;
 
 Select * from States_Products_Precomputed;

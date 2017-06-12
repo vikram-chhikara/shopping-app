@@ -23,6 +23,35 @@ public class PersonDAO {
 		this.con = con;
 	}
 	
+	public int personID(String username) {
+		PreparedStatement ptst = null;
+		ResultSet rs = null;
+		int id = 0;
+		
+		try {
+			ptst = con.prepareStatement(PERSON_EXISTS_SQL);
+			ptst.setString(1, username);
+			rs = ptst.executeQuery();
+			if(rs.next()) {
+				id = rs.getInt("id");
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(rs != null) {
+					rs.close();
+				}
+				if(ptst != null) {
+					ptst.close();
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return id;
+	}
+	
 	public boolean personExists(String username) {
 		boolean isExists = false;
 		PreparedStatement ptst = null;
