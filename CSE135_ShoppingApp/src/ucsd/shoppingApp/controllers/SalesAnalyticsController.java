@@ -31,7 +31,7 @@ public class SalesAnalyticsController extends HttpServlet {
 	private SalesDAO aDB = null;
 	private Connection con = null;
 	
-    private HashMap<String, HashMap<String, Double>> tableVals = null;
+    private HashMap<Integer, HashMap<Integer, Double>> tableVals = null;
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -45,7 +45,7 @@ public class SalesAnalyticsController extends HttpServlet {
 	public void init() throws ServletException {
 		con = ConnectionManager.getConnection();
 		aDB = new SalesDAO(con);
-		tableVals = new HashMap<String, HashMap<String, Double>>();
+		tableVals = new HashMap<Integer, HashMap<Integer, Double>>();
 
 		super.init();
 	}
@@ -65,37 +65,18 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getSession().setAttribute("orderChoice", "t");
 			request.getSession().setAttribute("catFilter", 0);
 			
+			/** Update table from the log table */
+			
 			//set sorting vals
 			String row = "states";
 			String sort = "t";
 			int cat;
 			
-			//keep track of row values and sorting methods/filters
-			if(request.getSession().getAttribute("nextClick") == null || Integer.parseInt(request.getSession().getAttribute("nextClick").toString()) == 0) {
-				if(request.getParameter("catFilter") != null) {
-					cat = Integer.parseInt(request.getParameter("catFilter"));
-				} else {
-					cat = 0;
-				}
-				request.getSession().setAttribute("catFilter", cat);
+			//see if filtering by category
+			if(request.getParameter("catFilter") != null) {
+				cat = Integer.parseInt(request.getParameter("catFilter"));
 			} else {
-				cat = Integer.parseInt(request.getSession().getAttribute("catFilter").toString());
-			}
-			
-			int pagecount = 0;
-			//page count default 0
-			
-			//col count for column display
-			int colcount = 0;
-			if(request.getSession().getAttribute("columnCount") != null) {
-				String pc = request.getSession().getAttribute("columnCount").toString();
-				colcount = Integer.parseInt(pc);
-				
-				if(request.getParameter("nextCol") != null) {
-					colcount++;
-					request.getSession().setAttribute("nextClick", 1);
-				}
-				request.getSession().setAttribute("columnCount", colcount);
+				cat = 0;
 			}
 			
 			//get Table

@@ -28,8 +28,8 @@ CREATE TABLE category (
 	modified_by TEXT,
 	modified_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
-
 CREATE TABLE product(
+
 	id SERIAL PRIMARY KEY,
 	sku_id TEXT NOT NULL UNIQUE,
 	product_name TEXT NOT NULL,

@@ -77,12 +77,12 @@
 				<td sytle="border:none;"> <button onclick="refreshTable(this);">Refresh</button> </td>
 				<%
 				//Get table values
-				HashMap<String, HashMap<String, Double>> an;
+				HashMap<Integer, HashMap<Integer, Double>> an;
 				if(session.getAttribute("alist") != null) {
-					an = (HashMap<String, HashMap<String, Double>>)session.getAttribute("alist");
+					an = (HashMap<Integer, HashMap<Integer, Double>>)session.getAttribute("alist");
 				} else {
 					System.out.println("null list");
-					an = new HashMap<String, HashMap<String, Double>>();
+					an = new HashMap<Integer, HashMap<Integer, Double>>();
 				}
 				
 				//get Row Names
@@ -111,55 +111,62 @@
 					curProd = prodRef.getProduct();
 					curProdPrice = "(" + prodRef.getPrice() + ")";
 					prodRefID = "prodtitle" + prodRef.getID();
+					
 					%>
-					<td style="border:1px solid black; font-weight:bold"><%=curProd%> <p id=<%=prodRefID %>><%=curProdPrice %></p> </td>
+					<th style="border:1px solid black;"><%=curProd%> <p id=<%=prodRefID %>><%=curProdPrice %></p> </th>
 					<%
-					if(i == prodNames.size() - 1) {
-						%>
-						<td><button onclick="refreshTable(this);">Refresh</button></td>
-						<%
-					}
 				}
-				
-				HashMap<String, Double> prodpri;
+				%>
+				<td><button onclick="refreshTable(this);">Refresh</button></td>
+				<%
+				HashMap<Integer, Double> prodpri;
 				AnalyticsModel currRow = null;
-				String currRowPrice, rowValID;
+				String currRowPrice, rowValID, cellID;
 				String rowVal = "(0.0)";
 				Double pri = 0.0;
+				Integer stateID, prodID;
 				
 				for(int i = 0; i < 50 && i < rowNames.size(); i++) {
 					currRow = rowNames.get(i);
 					rowVal = currRow.getRowName();
 					currRowPrice = "(" + currRow.getPrice() + ")";
 					rowValID = "rowtitle" + currRow.getID();
+					cellID = "cell" + currRow.getID();
+					
+					stateID = currRow.getID();
 					
 					%>
 					<tr>
 					<td style="border:1px solid black; font-weight:bold"><%=rowVal %> <p id=<%=rowValID%>><%=currRowPrice%></p></td>
 					<% 
 						for(int j = 0; j < 50 && j < prodNames.size(); j++) {
-							if(an.containsKey(rowVal)) {
-								prodpri = an.get(rowVal);
-								if(prodpri.containsKey(prodNames.get(j).getRowName())) {
-									pri = prodpri.get(prodNames.get(j).getRowName());
+							if(an.containsKey(stateID)) {
+								prodpri = an.get(stateID);
+								prodID = prodNames.get(j).getID();
+								cellID = cellID + "_" + prodID;
+								
+								if(prodpri.containsKey(prodID)) {
+									pri = prodpri.get(prodID);
 									%>
-									<td style="border:1px solid black;"><%=pri%></td>
+									<td id=<%=cellID%> style="border:1px solid black;"><%=pri%></td>
 									<%
 								} else {
 									%>
-									<td style="border:1px solid black;"></td>
+									<td id=<%=cellID%> style="border:1px solid black;"></td>
 									<%
 								}
 							} else {
 								%>
-								<td style="border:1px solid black;"></td>
+								<td id=<%=cellID%> style="border:1px solid black;"></td>
+								<%
+							}
+							if((i == 49) && (j == 49 || j == prodNames.size() - 1)) {
+								%>
+								<td><button onclick="refreshTable(this);">Refresh</button></td>
 								<%
 							}
 						}
-					if(i == rowNames.size() - 1) {
 					%>
-						<td><button onclick="refreshTable(this);">Refresh</button></td>
-					<%} %>
 					</tr>
 					<%
 				}

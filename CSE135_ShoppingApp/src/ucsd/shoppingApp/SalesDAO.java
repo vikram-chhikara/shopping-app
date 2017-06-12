@@ -208,10 +208,10 @@ public class SalesDAO {
 	}
 	
 	/** Precomputed Cell Table */
-	public HashMap<String, HashMap<String, Double>> getLimitedTable(int cat) {
+	public HashMap<Integer, HashMap<Integer, Double>> getLimitedTable(int cat) {
 		long tableTime = System.nanoTime();
-		HashMap<String, HashMap<String, Double>> table = new HashMap<String, HashMap<String, Double>>();
-		HashMap<String, Double> prodpri;
+		HashMap<Integer, HashMap<Integer, Double>> table = new HashMap<Integer, HashMap<Integer, Double>>();
+		HashMap<Integer, Double> prodpri;
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -243,12 +243,12 @@ public class SalesDAO {
 				stateID = rs.getInt("state_id");
 				prodID = rs.getInt("product_id");
 				
-				if(table.containsKey(row)) {
-					table.get(row).put(prod, pri);
+				if(table.containsKey(stateID)) {
+					table.get(stateID).put(prodID, pri);
 				} else {
-					prodpri = new HashMap<String, Double>();
-					prodpri.put(prod, pri);
-					table.put(row, prodpri);
+					prodpri = new HashMap<Integer, Double>();
+					prodpri.put(prodID, pri);
+					table.put(stateID, prodpri);
 				}
 			}
 			
