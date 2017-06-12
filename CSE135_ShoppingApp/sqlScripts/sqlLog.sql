@@ -1,11 +1,11 @@
 CREATE TABLE logTest(
+	ID SERIAL PRIMARY KEY,
     prod_id INTEGER NOT NULL,
     state_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
     price DOUBLE PRECISION NOT NULL CHECK(price >= 0.0),
     bought_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
-
 SELECT * FROM logTest;
 
 DROP TABLE logOwner;
@@ -40,20 +40,45 @@ EXECUTE PROCEDURE logIt();
 
 
 /* Update Queries for precomputed tables */
-UPDATE State_Precomputed
+/*UPDATE State_Precomputed
 SET price = State_Precomputed.price + (logT.price)
 FROM (SELECT state_id, category_id, SUM(price) AS price FROM logTest GROUP BY state_id, category_id) as logT
 WHERE State_Precomputed.state_id = logT.state_id
-AND State_Precomputed.category_id = logT.category_id;
+AND State_Precomputed.category_id = logT.category_id;*/
+UPDATE State_Precomputed
+SET price = State_Precomputed.price + lt.price, time = (now() AT TIME ZONE 'UTC')
+FROM (SELECT state_id, category_id, SUM(price) AS price FROM logTest GROUP BY state_id, category_id) 
+	AS lt JOIN logTest lt1 ON lt.state_id = lt1.state_id AND lt.category_id = lt1.category_id
+WHERE State_Precomputed.state_id = lt.state_id
+AND State_Precomputed.category_id = lt.category_id
+AND State_Precomputed.time < lt1.bought_time;
 
-UPDATE Products_Precomputed
+/*UPDATE Products_Precomputed
 SET price = Products_Precomputed.price + (logT.price)
 FROM (SELECT prod_id, SUM(price) AS price FROM logTest GROUP BY prod_id) as logT
 WHERE Products_Precomputed.product_id = logT.prod_id;
+*/
+UPDATE Products_Precomputed
+SET price = Products_Precomputed.price + (lt.price)
+FROM (SELECT prod_id, SUM(price) AS price FROM logTest GROUP BY prod_id) as lt 
+	JOIN logTest lt1 ON lt.prod_id = lt1.prod_id
+WHERE Products_Precomputed.product_id = lt.prod_id
+AND Products_Precomputed.time < lt1.bought_time;
 
-UPDATE States_Products_Precomputed
+/*UPDATE States_Products_Precomputed
 SET price = States_Products_Precomputed.price + (logT.price)
 FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as logT
 WHERE States_Products_Precomputed.product_id = logT.prod_id
-AND States_Products_Precomputed.state_id = logT.state_id;
+AND States_Products_Precomputed.state_id = logT.state_id;*/
+UPDATE States_Products_Precomputed
+SET price = States_Products_Precomputed.price + (lt.price)
+FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as lt 
+	JOIN logTest lt1 ON lt.prod_id = lt1.prod_id
+WHERE States_Products_Precomputed.product_id = lt.prod_id
+AND States_Products_Precomputed.state_id = lt.state_id
+AND States_Products_Precomputed.time < lt1.bought_time;
 
+
+
+
+DELETE FROM logTest;

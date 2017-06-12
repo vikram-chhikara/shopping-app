@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,19 +92,22 @@ public class SalesDAO {
 	
 	/* Update Precomputed Tables from the Log Table */
 	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
-			+ "SET price = State_Precomputed.price + (logT.price) "
-			+ "FROM (SELECT state_id, category_id, SUM(price) AS price FROM logTest GROUP BY state_id, category_id) as logT "
-			+ "WHERE State_Precomputed.state_id = logT.state_id "
-			+ "AND State_Precomputed.category_id = logT.category_id";
+			+ "SET price = State_Precomputed.price + lt.price, time = (now() AT TIME ZONE 'UTC') "
+			+ "FROM (SELECT state_id, category_id, SUM(price) AS price FROM logTest GROUP BY state_id, category_id) "
+			+ "AS lt JOIN logTest lt1 ON lt.state_id = lt1.state_id AND lt.category_id = lt1.category_id "
+			+ "WHERE State_Precomputed.state_id = lt.state_id AND State_Precomputed.category_id = lt.category_id "
+			+ "AND State_Precomputed.time < lt1.bought_time";
 	private static String PROD_PRECOMP_UPDATE = "UPDATE Products_Precomputed "
-			+ "SET price = Products_Precomputed.price + (logT.price) "
-			+ "FROM (SELECT prod_id, SUM(price) AS price FROM logTest GROUP BY prod_id) as logT "
-			+ "WHERE Products_Precomputed.product_id = logT.prod_id";
+			+ "SET price = Products_Precomputed.price + (lt.price) "
+			+ "FROM (SELECT prod_id, SUM(price) AS price FROM logTest GROUP BY prod_id) as lt "
+			+ "JOIN logTest lt1 ON lt.prod_id = lt1.prod_id WHERE Products_Precomputed.product_id = lt.prod_id";
 	private static String CELL_PRECOMP_UPDATE = "UPDATE States_Products_Precomputed "
-			+ "SET price = States_Products_Precomputed.price + (logT.price) "
-			+ "FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as logT "
-			+ "WHERE States_Products_Precomputed.product_id = logT.prod_id "
-			+ "AND States_Products_Precomputed.state_id = logT.state_id";
+			+ "SET price = States_Products_Precomputed.price + (lt.price) "
+			+ "FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as lt "
+			+ "JOIN logTest lt1 ON lt.prod_id = lt1.prod_id WHERE States_Products_Precomputed.product_id = lt.prod_id "
+			+ "AND States_Products_Precomputed.state_id = lt.state_id "
+			+ "AND States_Products_Precomputed.time < lt1.bought_time";
+	
 	private static String DELETE_LOG = "DELETE FROM logTest";
 	
 	private Connection con;
@@ -190,20 +194,17 @@ public class SalesDAO {
 	
 	public void refresh(int userid) {
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		int rs = 0;
 		
 		try {
 			pstmt = con.prepareStatement(USER_REFRESH);
 			pstmt.setInt(1, userid);
 			
-			rs = pstmt.executeQuery();
+			rs = pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null) {
-					rs.close();
-				}
 				if (pstmt != null) {
 					pstmt.close();
 				}
@@ -537,19 +538,19 @@ public class SalesDAO {
 	}
 	
 	public void updatePrecomp() {
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		Statement stmt = null;
+		int rs = 0;
 		
 		try {
 			con.commit();
 			con.setAutoCommit(false);
-			pstmt = con.prepareStatement(DELETE_LOG);
+			stmt = con.createStatement();
 			
 			updateStatePrecomp();
 			updateProdPrecomp();
 			updateCellPrecomp();
 			
-			rs = pstmt.executeQuery();
+			rs = stmt.executeUpdate(DELETE_LOG);
 			con.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -560,11 +561,8 @@ public class SalesDAO {
 			}
 		} finally {
 			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
+				if (stmt != null) {
+					stmt.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -573,22 +571,18 @@ public class SalesDAO {
 	}
 	
 	public void updateStatePrecomp() {
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		Statement stmt = null;
+		int rs = 0;
 		
 		try {
-			pstmt = con.prepareStatement(STATE_PRECOMP_UPDATE);
-			
-			rs = pstmt.executeQuery();
+			stmt = con.createStatement();
+			rs = stmt.executeUpdate(STATE_PRECOMP_UPDATE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
+				if (stmt != null) {
+					stmt.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -597,22 +591,18 @@ public class SalesDAO {
 	}
 	
 	public void updateProdPrecomp() {
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		Statement stmt = null;
+		int rs = 0;
 		
 		try {
-			pstmt = con.prepareStatement(PROD_PRECOMP_UPDATE);
-			
-			rs = pstmt.executeQuery();
+			stmt = con.createStatement();
+			rs = stmt.executeUpdate(PROD_PRECOMP_UPDATE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
+				if (stmt != null) {
+					stmt.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -621,22 +611,18 @@ public class SalesDAO {
 	}
 	
 	public void updateCellPrecomp() {
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		Statement stmt = null;
+		int rs = 0;
 		
 		try {
-			pstmt = con.prepareStatement(CELL_PRECOMP_UPDATE);
-			
-			rs = pstmt.executeQuery();
+			stmt = con.createStatement();
+			rs = stmt.executeUpdate(CELL_PRECOMP_UPDATE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
+				if (stmt != null) {
+					stmt.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

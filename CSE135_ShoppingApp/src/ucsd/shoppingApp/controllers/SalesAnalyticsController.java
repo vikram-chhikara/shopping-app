@@ -69,10 +69,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getSession().setAttribute("orderChoice", "t");
 			request.getSession().setAttribute("catFilter", 0);
 			
-			/** Update table from the log table */
-			//Update logOwner refresh time and retrieve last time it was udpated
-			lastTime = aDB.lastTimeAndClear(userID);
-			
+			/** Update table from the log table */	
 			//Make appropriate changes to precomputed tables
 			aDB.updatePrecomp();
 			
@@ -116,6 +113,9 @@ public class SalesAnalyticsController extends HttpServlet {
 	            }
 			}
 		}
+		
+		//Update logOwner refresh time and retrieve last time it was updated
+		lastTime = aDB.lastTimeAndClear(userID);
 		
 		RequestDispatcher view = request.getRequestDispatcher(forward);
 		view.forward(request, response);
