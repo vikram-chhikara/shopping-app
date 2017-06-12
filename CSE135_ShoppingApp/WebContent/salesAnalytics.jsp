@@ -19,26 +19,15 @@
         color:purple;
     }
     </style>
-    <script>
-    function showCustJson(str) {
-   	 var xmlHttp = new XMLHttpRequest();
-   	 var url="jsonSales.jsp";
-   	 var stateChanged = function () {
-   			 if (xmlHttp.readyState==4) {
-   			  console.log(xmlHttp.responseText);
-   			  var jsonStr = xmlHttp.responseText;
-   			  var result = JSON.parse(jsonStr);
-   			  console.log(result);
-   			  listAllRows(result);
-   			 }
-   		}
-   	 xmlHttp.onreadystatechange = stateChanged;
-   	 xmlHttp.open("GET", url, true);
-   	 xmlHttp.send(null);
-   	}
+    <script type ="text/javascript" src = "/CSE135_ShoppingApp/WebContent/update_refresh.js">
     </script>
 </head>
 <body>
+	<table>
+	<tbody id="tablebody">
+	<!-- put the result set -->
+	</tbody>
+	</table>
 <%
 	long startTime = System.nanoTime();
 	if(session.getAttribute("roleName") != null) {
