@@ -10,47 +10,65 @@
 <%
 //Sales model/class here 
 
-	//Get the results from Database
-	ArrayList<SaleModel> sales = new ArrayList<SaleModel>();
-	SalesDAO aDB;
+//Get the results from Database
+ArrayList<SaleModel> sales = new ArrayList<SaleModel>();
+SalesDAO aDB;
 
-	Connection con = ConnectionManager.getConnection();
-	aDB = new SalesDAO(con);
+Connection con = ConnectionManager.getConnection();
+aDB = new SalesDAO(con);
+
+sales = aDB.getLogTable(1);
 	
-	sales = aDB.getLogTable(1);
-	
-	
+System.out.print(request.getParameter("action").toString());
+
+ArrayList<AnalyticsModel> prodNames;
+prodNames = (ArrayList<AnalyticsModel>)session.getAttribute("prodList");
+
+ArrayList<AnalyticsModel> stateNames;
+stateNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
+
+HashMap<String, Double> col_update;
+HashMap<String, Double> row_update;
+HashMap<String,Double> newtop50;
+
+double pr_price=0;
+double st_price=0;
 
 
- System.out.print(request.getParameter("action").toString());
- if (request.getParameter("action").toString().equalsIgnoreCase("all")){
-	 for (int i=0; i<50; i++){
-		 Company c = new Company();
-		 c.setName("Company_"+Integer.toString(i));
-		 c.setCity("City_"+Integer.toString(i));
-		 c.setId(Integer.toString(i));
-		 companies.add(c);
-		 //TODO add id to update particular cell
-	 }
- }
- else {
-	 for (int i=0;i<10;i+=2){
-		 Company c = new Company();
-		 c.setName("Change_Company_"+Integer.toString(i));
-		 c.setCity("Change_City_"+Integer.toString(i));
-		 c.setId(Integer.toString(i));
-		 companies.add(c);
-		 //TODO add id to update particular cell
-	 }
- }
-
- // put the results in Json object
+// put the results in Json object
 JSONObject jObject = new JSONObject();
 try
 {
     JSONArray jArray = new JSONArray();
     for (SaleModel c : sales)
     {
+    	String prID= Integer.toString(c.getProdID());
+    	String stateID= Integer.toString(c.getStateID());
+
+    	//loop over product sales arraylist
+    	for(int i=0; i < prodNames.size(); i++){
+    		AnalyticsModel prMod = prodNames.get(i);
+    		if(Integer.toString(prMod.getID() )== prID){//red color
+    			pr_price = prMod.getPrice() + c.getPrice();
+    			if(i <50) col_update.put(prID, pr_price) ;
+    			else{//purple column
+    				if(pr_price > (prodNames.get(49).getPrice())){
+    					newtop50.put(Integer.toString(prMod.getID()),pr_price);
+    				}
+    			}
+    		}
+    		pr_price=0;
+    	}
+    	//loop over states arraylist
+    	for(int i=0; i < stateNames.size(); i++){
+    		AnalyticsModel stateMod = stateNames.get(i);
+    		if(Integer.toString(stateMod.getID() )== stateID){//red color
+    			st_price = stateMod.getPrice() + c.getPrice();
+    		}
+    		row_update.put(stateID,st_price);
+    		
+    	}
+    	
          JSONObject cJSON = new JSONObject();
          cJSON.put("prodid", c.getProdID());
          cJSON.put("stateId", c.getStateID());
