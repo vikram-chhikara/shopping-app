@@ -88,7 +88,8 @@ public class SalesDAO {
 	/** Log Table Update */
 	private static String USER_REFRESH = "UPDATE logOwner SET last_refresh = (now() AT TIME ZONE 'UTC') WHERE user_id = ?";
 	private static String USER_TIME = "SELECT * FROM logOwner WHERE user_id = ?";
-	private static String GET_LOG_TABLE = "SELECT * FROM logTest";
+	private static String GET_LOG_TABLE = "SELECT * FROM logTest, logOwner "
+			+ "WHERE logTest.bought_time > logOwner.last_refresh AND logOwner.user_id = ?";
 	
 	/* Update Precomputed Tables from the Log Table */
 	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
@@ -130,6 +131,7 @@ public class SalesDAO {
 		
 		try {
 			pstmt = con.prepareStatement(GET_LOG_TABLE);
+			pstmt.setInt(1, userid);
 			
 			rs = pstmt.executeQuery();
 			

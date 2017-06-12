@@ -193,6 +193,6 @@
 	    long deltaTime = System.nanoTime() - startTime;
 	    System.out.println("Time: " + (deltaTime/1000000));
 	%>
-	<script type="text/javascript" src="./salesRefresh.js"></script>
+	<script type="text/javascript" src="./update_refresh.js"></script>
 </body>
 </html>
