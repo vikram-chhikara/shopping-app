@@ -19,6 +19,24 @@
         color:purple;
     }
     </style>
+    <script>
+    function showCustJson(str) {
+   	 var xmlHttp = new XMLHttpRequest();
+   	 var url="jsonSales.jsp";
+   	 var stateChanged = function () {
+   			 if (xmlHttp.readyState==4) {
+   			  console.log(xmlHttp.responseText);
+   			  var jsonStr = xmlHttp.responseText;
+   			  var result = JSON.parse(jsonStr);
+   			  console.log(result);
+   			  listAllRows(result);
+   			 }
+   		}
+   	 xmlHttp.onreadystatechange = stateChanged;
+   	 xmlHttp.open("GET", url, true);
+   	 xmlHttp.send(null);
+   	}
+    </script>
 </head>
 <body>
 <%

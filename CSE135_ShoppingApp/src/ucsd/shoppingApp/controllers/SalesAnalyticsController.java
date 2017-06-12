@@ -59,6 +59,7 @@ public class SalesAnalyticsController extends HttpServlet {
 		int userID = Integer.parseInt(request.getSession().getAttribute("login_id").toString());
 		java.sql.Timestamp lastTime;
 		
+		
 		//If refresh = 2, don't do a full refresh
 		if(request.getParameter("clean") != null && Integer.parseInt(request.getParameter("clean")) == 2) {
 			
@@ -73,8 +74,7 @@ public class SalesAnalyticsController extends HttpServlet {
 			lastTime = aDB.lastTimeAndClear(userID);
 			
 			//Make appropriate changes to precomputed tables
-			
-			
+			aDB.updatePrecomp();
 			
 			//set sorting vals
 			int cat;

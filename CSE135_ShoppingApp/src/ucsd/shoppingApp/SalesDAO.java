@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import ucsd.shoppingApp.models.AnalyticsModel;
+import ucsd.shoppingApp.models.SaleModel;
 
 public class SalesDAO {
 	/* Get row names */
@@ -78,14 +79,32 @@ public class SalesDAO {
 			+ "((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) "
 			+ "JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot "
 			+ "GROUP BY tot.state_name, product_name";
-	private static String GET_LIMITED_TABLE = "Select * FROM States_Products_Precomputed spp "
-			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp LIMIT 50)";
+	private static String GET_LIMITED_TABLE = "(Select * FROM States_Products_Precomputed spp "
+			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp ORDER BY price DESC LIMIT 50))";
 	private static String GET_CAT_LIMITED_TABLE = "Select * FROM States_Products_Precomputed spp "
-			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp WHERE pp.category_id = ?)";
+			+ "WHERE spp.product_id IN (SELECT pp.product_id FROM Products_Precomputed pp WHERE pp.category_id = ? ORDER BY price DESC LIMIT 50)";
 	
 	/** Log Table Update */
 	private static String USER_REFRESH = "UPDATE logOwner SET last_refresh = (now() AT TIME ZONE 'UTC') WHERE user_id = ?";
 	private static String USER_TIME = "SELECT * FROM logOwner WHERE user_id = ?";
+	private static String GET_LOG_TABLE = "SELECT * FROM logTest";
+	
+	/* Update Precomputed Tables from the Log Table */
+	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
+			+ "SET price = State_Precomputed.price + (logT.price) "
+			+ "FROM (SELECT state_id, category_id, SUM(price) AS price FROM logTest GROUP BY state_id, category_id) as logT "
+			+ "WHERE State_Precomputed.state_id = logT.state_id "
+			+ "AND State_Precomputed.category_id = logT.category_id";
+	private static String PROD_PRECOMP_UPDATE = "UPDATE Products_Precomputed "
+			+ "SET price = Products_Precomputed.price + (logT.price) "
+			+ "FROM (SELECT prod_id, SUM(price) AS price FROM logTest GROUP BY prod_id) as logT "
+			+ "WHERE Products_Precomputed.product_id = logT.prod_id";
+	private static String CELL_PRECOMP_UPDATE = "UPDATE States_Products_Precomputed "
+			+ "SET price = States_Products_Precomputed.price + (logT.price) "
+			+ "FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as logT "
+			+ "WHERE States_Products_Precomputed.product_id = logT.prod_id "
+			+ "AND States_Products_Precomputed.state_id = logT.state_id";
+	private static String DELETE_LOG = "DELETE FROM logTest";
 	
 	private Connection con;
 
@@ -94,6 +113,49 @@ public class SalesDAO {
 	}
 
 	/** Project Part 3*/
+	public ArrayList<SaleModel> getLogTable(int userid) {
+		ArrayList<SaleModel> table = new ArrayList<SaleModel>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		int prodID = 0;
+		int stateID = 0;
+		int catID = 0;
+		Double pri = 0.0;
+		java.sql.Timestamp t = null;
+		
+		try {
+			pstmt = con.prepareStatement(GET_LOG_TABLE);
+			
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				prodID = rs.getInt("prod_id");
+				stateID = rs.getInt("state_id");
+				catID = rs.getInt("category_id");
+				pri = rs.getDouble("price");
+				t = rs.getTimestamp("bought_time");
+				
+				SaleModel s = new SaleModel(prodID, stateID, catID, pri, t);
+				table.add(s);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return table;
+	}
+	
 	public java.sql.Timestamp lastTimeAndClear(int userid) {
 		java.sql.Timestamp lt = null;
 		PreparedStatement pstmt = null;
@@ -472,5 +534,113 @@ public class SalesDAO {
 			}
 		}
 		return table;
+	}
+	
+	public void updatePrecomp() {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			con.commit();
+			con.setAutoCommit(false);
+			pstmt = con.prepareStatement(DELETE_LOG);
+			
+			updateStatePrecomp();
+			updateProdPrecomp();
+			updateCellPrecomp();
+			
+			rs = pstmt.executeQuery();
+			con.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				con.rollback();
+			} catch (Exception ef) {
+				e.printStackTrace();
+			}
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void updateStatePrecomp() {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(STATE_PRECOMP_UPDATE);
+			
+			rs = pstmt.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void updateProdPrecomp() {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(PROD_PRECOMP_UPDATE);
+			
+			rs = pstmt.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void updateCellPrecomp() {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			pstmt = con.prepareStatement(CELL_PRECOMP_UPDATE);
+			
+			rs = pstmt.executeQuery();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
