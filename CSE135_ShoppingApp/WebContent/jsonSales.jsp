@@ -3,17 +3,21 @@
 <% response.setContentType("application/json") ; %>
 <%@page contentType="text/html; charset=UTF-8"%>
 <%@page import="org.json.*, java.lang.*"%>
-<%@page import="ucsd.shoppingApp.models.* , java.util.*, ucsd.shoppingApp.ConnectionManager, ucsd.shoppingApp.SalesDAO" %>
+<%@page import="ucsd.shoppingApp.models.*, java.util.*" %>
+<%@page import="ucsd.shoppingApp.ConnectionManager"%>
+<%@page import="ucsd.shoppingApp.SalesDAO"%>
+<%@page import="java.sql.Connection"%>
 <%
 //Sales model/class here 
 
 	//Get the results from Database
 	ArrayList<SaleModel> sales = new ArrayList<SaleModel>();
+	SalesDAO aDB;
 
 	Connection con = ConnectionManager.getConnection();
 	aDB = new SalesDAO(con);
 	
-	sales = aDB.getLogTable();
+	sales = aDB.getLogTable(1);
 	
 	
 
