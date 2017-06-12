@@ -69,13 +69,21 @@ try
     		
     	}
     	
-         JSONObject cJSON = new JSONObject();
+/*          JSONObject cJSON = new JSONObject();
          cJSON.put("prodid", c.getProdID());
          cJSON.put("stateId", c.getStateID());
          cJSON.put("price", c.getPrice());
-         jArray.put(cJSON);
+         jArray.put(cJSON); */
+
     }
-    jObject.put("SalesList", jArray);
+    JSONObject cJSON = new JSONObject();
+    cJSON.put("updatedProducts", col_update);
+    cJSON.put("updatedStates", row_update);
+    cJSON.put("newTop50", newtop50);
+    jArray.put(cJSON);
+    
+    jObject.put("updates", jArray);
+
 } catch (Exception jse) {
     jse.printStackTrace();
 }
