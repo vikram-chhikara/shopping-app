@@ -6,6 +6,8 @@ public class SaleModel {
 	private int categoryID;
 	private double price;
 	private java.sql.Timestamp time;
+	private double stateSum;
+	private double prodSum;
 
 	public SaleModel(){
 	}
@@ -18,12 +20,14 @@ public class SaleModel {
 		this.time = t;
 	}
 	
-	public SaleModel(int prod, int state, int cat, double pri) {
+	public SaleModel(int prod, int state, int cat, double pri, double ss, double ps) {
 		this.prodID = prod;
 		this.stateID = state;
 		this.categoryID = cat;
 		this.price = pri;
 		this.time = null;
+		this.stateSum = ss;
+		this.prodSum = ps;
 	}
 
 	public int getProdID() {
@@ -64,6 +68,22 @@ public class SaleModel {
 
 	public void setTime(java.sql.Timestamp time) {
 		this.time = time;
+	}
+	
+	public double getStateSum() {
+		return stateSum;
+	}
+
+	public void setStateSum(double stateSum) {
+		this.stateSum = stateSum;
+	}
+
+	public double getProdSum() {
+		return prodSum;
+	}
+
+	public void setProdSum(double prodSum) {
+		this.prodSum = prodSum;
 	}
 
 	@Override

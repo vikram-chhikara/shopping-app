@@ -70,10 +70,6 @@ public class SalesAnalyticsController extends HttpServlet {
 			request.getSession().setAttribute("orderChoice", "t");
 			request.getSession().setAttribute("catFilter", 0);
 			
-			/** Update table from the log table */	
-			//Make appropriate changes to precomputed tables
-			aDB.updatePrecomp();
-			
 			//set sorting vals
 			int cat;
 			
@@ -84,6 +80,10 @@ public class SalesAnalyticsController extends HttpServlet {
 				cat = 0;
 			}
 			request.getSession().setAttribute("categoryFilter", cat);
+			
+			/** Update table from the log table */	
+			//Make appropriate changes to precomputed tables
+			aDB.updatePrecomp(cat);
 			
 			//get Table
 			tableVals = aDB.getLimitedTable(cat);

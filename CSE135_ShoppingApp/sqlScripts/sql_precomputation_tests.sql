@@ -1,9 +1,9 @@
-DROP TABLE State_Precomputed;
+DROP TABLE State_Precomputed CASCADE;
 CREATE TABLE State_Precomputed (
 state_id INTEGER NOT NULL,
 state_name TEXT NOT NULL,
 category_id INTEGER,
-price REAL NOT NULL CHECK(price >= 0.0),
+price DOUBLE PRECISION NOT NULL CHECK(price >= 0.0),
 time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 INSERT INTO State_Precomputed((SELECT state_id, tot.state_name, tot.cat_id, SUM(tot.price) AS price, (now() AT TIME ZONE 'UTC')
@@ -12,10 +12,10 @@ INSERT INTO State_Precomputed((SELECT state_id, tot.state_name, tot.cat_id, SUM(
 			((products_in_cart pc JOIN product pr ON pc.product_id = pr.id) 
 			JOIN shopping_cart sc ON pc.cart_id = sc.id) ON p.id = person_id) as tot
 			GROUP BY state_id, tot.cat_id, tot.state_name ORDER BY price DESC));
-SELECT * FROM State_Precomputed
+SELECT * FROM State_Precomputed;
 
 
-DROP TABLE Products_Precomputed;
+DROP TABLE Products_Precomputed CASCADE;
 CREATE TABLE Products_Precomputed (
 product_id INTEGER NOT NULL,
 product_name TEXT NOT NULL,
@@ -28,16 +28,16 @@ INSERT INTO Products_Precomputed(SELECT p.id, product_name, p.category_id, COALE
 			GROUP BY p.id, product_name, pr.price
 			ORDER BY price DESC);
 
-SELECT * FROM Products_Precomputed
+SELECT * FROM Products_Precomputed;
 
 
-DROP TABLE States_Products_Precomputed;
+DROP TABLE States_Products_Precomputed CASCADE;
 CREATE TABLE States_Products_Precomputed (
 state_id INTEGER NOT NULL,
 state_name TEXT NOT NULL,
 product_id INTEGER NOT NULL,
 product_name TEXT NOT NULL,
-price REAL NOT NULL CHECK(price >= 0.0),
+price DOUBLE PRECISION NOT NULL CHECK(price >= 0.0),
 time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 

@@ -89,10 +89,15 @@ public class SalesDAO {
 	/** Log Table Update */
 	private static String USER_REFRESH = "UPDATE logOwner SET last_refresh = (now() AT TIME ZONE 'UTC') WHERE user_id = ?";
 	private static String USER_TIME = "SELECT * FROM logOwner WHERE user_id = ?";
-	private static String GET_LOG_TABLE = "SELECT logTest.state_id, logTest.prod_id, logTest.category_id, "
+	private static String GET_LOG_TABLE = "WITH tot_table AS (SELECT logTest.state_id, logTest.prod_id, logTest.category_id, "
 			+ "SUM(logTest.price) as price FROM logTest, logOwner "
 			+ "WHERE logTest.bought_time > logOwner.last_refresh AND logOwner.user_id = ? "
-			+ "GROUP BY state_id, prod_id, logTest.category_id ORDER BY price";
+			+ "GROUP BY state_id, prod_id, logTest.category_id ORDER BY price), "
+			+ "state_pri AS (SELECT state_id, SUM(price) AS price FROM tot_table GROUP BY state_id), "
+			+ "prod_pri AS (SELECT prod_id, SUM(price) AS price FROM tot_table GROUP BY prod_id) "
+			+ "SELECT tt.state_id, tt.prod_id, tt.category_id, tt.price, sp.price AS state_sum, pp.price AS prod_sum "
+			+ "from state_pri sp CROSS JOIN prod_pri pp "
+			+ "LEFT OUTER JOIN tot_table tt ON ( pp.prod_id = tt.prod_id and sp.state_id = tt.state_id) ";
 	
 	/* Update Precomputed Tables from the Log Table */
 	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
@@ -108,11 +113,12 @@ public class SalesDAO {
 	private static String CELL_PRECOMP_UPDATE = "UPDATE States_Products_Precomputed "
 			+ "SET price = States_Products_Precomputed.price + (lt.price) "
 			+ "FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_id, state_id) as lt "
-			+ "JOIN logTest lt1 ON lt.prod_id = lt1.prod_id WHERE States_Products_Precomputed.product_id = lt.prod_id "
+			+ "JOIN logTest lt1 ON lt.prod_id = lt1.prod_id AND lt.state_id = lt1.state_id "
+			+ "WHERE States_Products_Precomputed.product_id = lt.prod_id "
 			+ "AND States_Products_Precomputed.state_id = lt.state_id "
 			+ "AND States_Products_Precomputed.time < lt1.bought_time";
 	
-	private static String DELETE_LOG = "DELETE FROM logTest";
+	private static String DELETE_LOG = "DELETE FROM logTest WHERE bought_time < (now() AT TIME ZONE 'UTC')";
 	
 	private Connection con;
 
@@ -175,6 +181,8 @@ public class SalesDAO {
 		int stateID = 0;
 		int catID = 0;
 		Double pri = 0.0;
+		Double spri = 0.0;
+		Double ppri = 0.0;
 		
 		try {
 			pstmt = con.prepareStatement(GET_LOG_TABLE);
@@ -187,8 +195,10 @@ public class SalesDAO {
 				stateID = rs.getInt("state_id");
 				catID = rs.getInt("category_id");
 				pri = rs.getDouble("price");
+				spri = rs.getDouble("state_sum");
+				ppri = rs.getDouble("prod_sum");
 				
-				SaleModel s = new SaleModel(prodID, stateID, catID, pri);
+				SaleModel s = new SaleModel(prodID, stateID, catID, pri, spri, ppri);
 				table.add(s);
 			}
 		} catch (Exception e) {
@@ -209,6 +219,7 @@ public class SalesDAO {
 	}
 	
 	public java.sql.Timestamp lastTimeAndClear(int userid) {
+		System.out.println("Find last user refresh");
 		java.sql.Timestamp lt = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -241,6 +252,7 @@ public class SalesDAO {
 	}
 	
 	public void refresh(int userid) {
+		System.out.println("Update log table");
 		PreparedStatement pstmt = null;
 		int rs = 0;
 		
@@ -611,7 +623,7 @@ public class SalesDAO {
 		return table;
 	}
 	
-	public void updatePrecomp() {
+	public void updatePrecomp(int cat) {
 		Statement stmt = null;
 		int rs = 0;
 		
@@ -620,9 +632,9 @@ public class SalesDAO {
 			con.setAutoCommit(false);
 			stmt = con.createStatement();
 			
-			updateStatePrecomp();
-			updateProdPrecomp();
-			updateCellPrecomp();
+			updateStatePrecomp(cat);
+			updateProdPrecomp(cat);
+			updateCellPrecomp(cat);
 			
 			rs = stmt.executeUpdate(DELETE_LOG);
 			con.commit();
@@ -644,7 +656,8 @@ public class SalesDAO {
 		}
 	}
 	
-	public void updateStatePrecomp() {
+	public void updateStatePrecomp(int cat) {
+		System.out.println("Update state precomp table");
 		Statement stmt = null;
 		int rs = 0;
 		
@@ -664,7 +677,8 @@ public class SalesDAO {
 		}
 	}
 	
-	public void updateProdPrecomp() {
+	public void updateProdPrecomp(int cat) {
+		System.out.println("Update prod precomp table");
 		Statement stmt = null;
 		int rs = 0;
 		
@@ -684,7 +698,8 @@ public class SalesDAO {
 		}
 	}
 	
-	public void updateCellPrecomp() {
+	public void updateCellPrecomp(int cat) {
+		System.out.println("Update cell precomp table");
 		Statement stmt = null;
 		int rs = 0;
 		

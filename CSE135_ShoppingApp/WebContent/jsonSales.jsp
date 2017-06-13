@@ -25,6 +25,7 @@ LinkedHashMap<Integer, AnalyticsModel> stateNames;
 stateNames = (LinkedHashMap<Integer, AnalyticsModel>)session.getAttribute("rowList");
 
 HashMap<Integer, HashMap<Integer, Double>> cellMap = (HashMap<Integer, HashMap<Integer, Double>>)session.getAttribute("alist");
+HashMap<Integer, Double> newStateVals = new HashMap<Integer, Double>();
 
 ArrayList<Double> outsider = new ArrayList<Double>();
 
@@ -70,12 +71,16 @@ try
     	if(prodNames.contains(testM) && (currFilter == 0 || currFilter == catID)) {	//Should always find it, but sanity check
     		//state header column
     		if(stateNames.containsKey(stateID)) {
-    			st_price = stateNames.get(stateID).getPrice() + addpri;
-    			
-    			JSONObject sJSON = new JSONObject();
-		        sJSON.put("id", stitle + stateID);
-		        sJSON.put("value", st_price);
-		        jArrayRC.put(sJSON);
+    			//Find if already calculated
+    			if(!newStateVals.containsKey(stateID)) {
+    				st_price = stateNames.get(stateID).getPrice() + c.getStateSum();
+        			newStateVals.put(stateID, st_price);
+    				
+    				JSONObject sJSON = new JSONObject();
+    		        sJSON.put("id", stitle + stateID);
+    		        sJSON.put("value", st_price);
+    		        jArrayRC.put(sJSON);
+    			}
     		}
     		
     		idxp = prodNames.indexOf(testM);
@@ -125,12 +130,12 @@ try
   		System.out.println("outsider " + check + " vs " + "sortedprod " + smin);
   		
   		if(check > smin) {
-  			System.out.println("add to purple");
 	  		JSONObject pJSON = new JSONObject();
 	  		int idxof = oldProd.indexOf(smin);
 	  	    pJSON.put("id", prodNames.get(idxof).getID());
 	  	    
 	  	    jArrayP.put(pJSON);
+	  	    System.out.println("add to purple column " + prodNames.get(idxof).getID());
 	  	    min++;
   		} else {
   			break;
