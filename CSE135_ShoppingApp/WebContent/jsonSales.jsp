@@ -19,12 +19,19 @@ aDB = new SalesDAO(con);
 sales = aDB.getLogTable(Integer.parseInt(session.getAttribute("login_id").toString()));
 
 ArrayList<AnalyticsModel> prodNames;
-prodNames = (ArrayList<AnalyticsModel>)session.getAttribute("prodList");
+prodNames = ((ArrayList<AnalyticsModel>)session.getAttribute("prodList"));
 
 LinkedHashMap<Integer, AnalyticsModel> stateNames;
 stateNames = (LinkedHashMap<Integer, AnalyticsModel>)session.getAttribute("rowList");
 
 HashMap<Integer, HashMap<Integer, Double>> cellMap = (HashMap<Integer, HashMap<Integer, Double>>)session.getAttribute("alist");
+
+ArrayList<Double> outsider = new ArrayList<Double>();
+
+ArrayList<Double> oldProd = new ArrayList<Double>(50);
+for(int i = 0; i < 50; i++) {
+	oldProd.add(prodNames.get(i).getPrice());
+}
 
 int currFilter = Integer.parseInt(session.getAttribute("categoryFilter").toString());
 
@@ -32,6 +39,7 @@ double pr_price=0, st_price=0, cell_price = 0;
 
 int idxp = 0, idxs = 0;
 int minimumidx = 49;
+Double minP = prodNames.get(minimumidx).getPrice();
 
 String ptitle = "prodtitle";
 String stitle = "rowtitle";
@@ -48,7 +56,8 @@ try
     
     //Determine changes in product values and totals
     JSONArray jArrayP = new JSONArray();	//Make purple
-    JSONArray jArrayR = new JSONArray();	//Make red
+    JSONArray jArrayRT = new JSONArray();	//Make red title
+    JSONArray jArrayRC = new JSONArray();	//Make red cells
     for (SaleModel c : sales)
     {
     	int prID = c.getProdID();
@@ -59,54 +68,79 @@ try
     	testM = new AnalyticsModel("", "", addpri, prID);
     	
     	if(prodNames.contains(testM) && (currFilter == 0 || currFilter == catID)) {	//Should always find it, but sanity check
-    		
     		//state header column
     		if(stateNames.containsKey(stateID)) {
     			st_price = stateNames.get(stateID).getPrice() + addpri;
     			
-    			stateNames.get(stateID).setPrice(st_price);
-    			
     			JSONObject sJSON = new JSONObject();
 		        sJSON.put("id", stitle + stateID);
 		        sJSON.put("value", st_price);
-		        jArrayR.put(sJSON);
+		        jArrayRC.put(sJSON);
     		}
     		
     		idxp = prodNames.indexOf(testM);
-    		pr_price = prodNames.get(idxp).getPrice() + addpri;
     		
     		//product header row
     		if(idxp <= minimumidx) {
-    			prodNames.get(idxp).setPrice(pr_price);
+    			pr_price = oldProd.get(idxp) + addpri;
+    			oldProd.set(idxp, pr_price);
     			
 		    	JSONObject pJSON = new JSONObject();
 		        pJSON.put("id", ptitle + prID);
 		        pJSON.put("value", pr_price);
-		        	
-		        jArrayR.put(pJSON);
-    		} else if(pr_price > prodNames.get(minimumidx).getPrice()) {
-    			JSONObject pJSON = new JSONObject();
-		        pJSON.put("id", prodNames.get(minimumidx).getID());
-		        	
-		        jArrayP.put(pJSON);
-		        minimumidx--;
-    		}
 
-    		//Cell
-    		if(cellMap.containsKey(stateID)) {
-    			if(cellMap.get(stateID).containsKey(prID)) {
-		    		cell_price = cellMap.get(stateID).get(prID) + addpri;
-		    		JSONObject cJSON = new JSONObject();
-			        cJSON.put("id", celltitle + stateID + "_" + prID);
-			        cJSON.put("value", cell_price);
-			        	
-			        jArrayR.put(cJSON);
-    			}
+		        jArrayRT.put(pJSON);
+		        
+		      //Cell
+	    		if(cellMap.containsKey(stateID)) {
+	    			if(cellMap.get(stateID).containsKey(prID)) {
+			    		cell_price = cellMap.get(stateID).get(prID) + addpri;
+			    		JSONObject cJSON = new JSONObject();
+				        cJSON.put("id", celltitle + stateID + "_" + prID);
+				        cJSON.put("value", cell_price);
+				        	
+				        jArrayRC.put(cJSON);
+	    			}
+	    		}
+    		} else if(pr_price > minP){
+    			pr_price = prodNames.get(idxp).getPrice() + addpri;
+    			prodNames.get(idxp).setPrice(pr_price);
+    			outsider.add(pr_price);
     		}
     	}
     }
+    
+  	//Compare price to current top list. If so, add that listed number to purple
+  	Collections.sort(outsider);
+  	ArrayList<Double> sortedO = oldProd;
+  	Collections.sort(sortedO);
+  	
+  	//outsider = 8, 7, 6, 5 price
+  	//oldProd = 3, 4, 5, 6, 6 price
+  	
+  	for(int i = outsider.size() - 1, min = 0; i >= 0 && min < oldProd.size(); i++) {
+  		Double check = outsider.get(i);
+  		Double smin = sortedO.get(min);
+  		
+  		System.out.println("outsider " + check + " vs " + "sortedprod " + smin);
+  		
+  		if(check > smin) {
+  			System.out.println("add to purple");
+	  		JSONObject pJSON = new JSONObject();
+	  		int idxof = oldProd.indexOf(smin);
+	  	    pJSON.put("id", prodNames.get(idxof).getID());
+	  	    
+	  	    jArrayP.put(pJSON);
+	  	    min++;
+  		} else {
+  			break;
+  		}
+  	}
+    
+    //Add all arrays to final JSON object
     jObject.put("purple", jArrayP);
-    jObject.put("red", jArrayR);
+    jObject.put("red", jArrayRC);
+    jObject.put("colred", jArrayRT);
     System.out.println("Finished with JSON");
     
 } catch (Exception jse) {

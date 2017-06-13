@@ -27,8 +27,6 @@
 	<!-- put the result set -->
 	</tbody>
 	</table>
-	<p id="log1"></p>
-	<p id="log"></p>
 <%
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();

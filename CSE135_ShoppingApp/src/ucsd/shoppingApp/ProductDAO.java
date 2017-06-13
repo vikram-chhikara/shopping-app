@@ -65,7 +65,6 @@ public class ProductDAO {
 	
 	/** Project Part 3 **/
 	public LinkedHashMap<Integer, AnalyticsModel> getPrecompProdList(int cat) throws SQLException {
-		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		LinkedHashMap<Integer, AnalyticsModel> result = new LinkedHashMap<Integer, AnalyticsModel>();
@@ -84,9 +83,6 @@ public class ProductDAO {
 			int amID;
 			
 			rs = pstmt.executeQuery();
-
-			long deltaTime = System.nanoTime() - tableTime;
-		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
 			
 			while (rs.next()) {
 				prod = rs.getString("product_name");
@@ -116,7 +112,6 @@ public class ProductDAO {
 	}
 	
 	public ArrayList<AnalyticsModel> getPrecomputedProdList(int cat) throws SQLException {
-		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		ArrayList<AnalyticsModel> result = new ArrayList<AnalyticsModel>();
@@ -135,9 +130,6 @@ public class ProductDAO {
 			int amID;
 			
 			rs = pstmt.executeQuery();
-
-			long deltaTime = System.nanoTime() - tableTime;
-		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
 			
 			while (rs.next()) {
 				prod = rs.getString("product_name");

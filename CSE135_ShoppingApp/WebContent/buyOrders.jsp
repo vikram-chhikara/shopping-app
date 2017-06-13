@@ -88,7 +88,8 @@
 								productsCartPtst.setInt(2, productId);
 								productPrice = productRs.getInt("price");
 								productsCartPtst.setInt(3, productPrice);
-								quantity = rand.nextInt(10)+1;
+								//quantity = rand.nextInt(10)+1;
+								quantity = 100000;
 								productsCartPtst.setInt(4, quantity);
 								
 								productsCartPtst.addBatch();
