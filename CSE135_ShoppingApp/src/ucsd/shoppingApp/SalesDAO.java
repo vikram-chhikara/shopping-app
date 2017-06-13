@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import ucsd.shoppingApp.models.AnalyticsModel;
@@ -88,8 +89,10 @@ public class SalesDAO {
 	/** Log Table Update */
 	private static String USER_REFRESH = "UPDATE logOwner SET last_refresh = (now() AT TIME ZONE 'UTC') WHERE user_id = ?";
 	private static String USER_TIME = "SELECT * FROM logOwner WHERE user_id = ?";
-	private static String GET_LOG_TABLE = "SELECT * FROM logTest, logOwner "
-			+ "WHERE logTest.bought_time > logOwner.last_refresh AND logOwner.user_id = ?";
+	private static String GET_LOG_TABLE = "SELECT logTest.state_id, logTest.prod_id, logTest.category_id, "
+			+ "SUM(logTest.price) as price FROM logTest, logOwner "
+			+ "WHERE logTest.bought_time > logOwner.last_refresh AND logOwner.user_id = ? "
+			+ "GROUP BY state_id, prod_id, logTest.category_id ORDER BY price";
 	
 	/* Update Precomputed Tables from the Log Table */
 	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
@@ -118,8 +121,9 @@ public class SalesDAO {
 	}
 
 	/** Project Part 3*/
-	public ArrayList<SaleModel> getLogTable(int userid) {
-		ArrayList<SaleModel> table = new ArrayList<SaleModel>();
+	/*
+	public HashMap<Integer, Double> getLogTable(int userid) {
+		HashMap<Integer, Double> table = new HashMap<Integer, Double>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
@@ -143,6 +147,48 @@ public class SalesDAO {
 				t = rs.getTimestamp("bought_time");
 				
 				SaleModel s = new SaleModel(prodID, stateID, catID, pri, t);
+				table.add(s);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return table;
+	}*/
+	
+	public ArrayList<SaleModel> getLogTable(int userid) {
+		ArrayList<SaleModel> table = new ArrayList<SaleModel>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		int prodID = 0;
+		int stateID = 0;
+		int catID = 0;
+		Double pri = 0.0;
+		
+		try {
+			pstmt = con.prepareStatement(GET_LOG_TABLE);
+			pstmt.setInt(1, userid);
+			
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				prodID = rs.getInt("prod_id");
+				stateID = rs.getInt("state_id");
+				catID = rs.getInt("category_id");
+				pri = rs.getDouble("price");
+				
+				SaleModel s = new SaleModel(prodID, stateID, catID, pri);
 				table.add(s);
 			}
 		} catch (Exception e) {
@@ -214,6 +260,52 @@ public class SalesDAO {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public LinkedHashMap<Integer, AnalyticsModel> getStatePrecomp(int cat) {
+		LinkedHashMap<Integer, AnalyticsModel> table = new LinkedHashMap<Integer, AnalyticsModel>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String row = "";
+		String prod = "";
+		Double pri = 0.0;
+		int amID = 0;
+		
+		try {
+			if(cat == 0) {
+				pstmt = con.prepareStatement(GET_PRECOMP_STATES);
+			}
+			else {
+				pstmt = con.prepareStatement(GET_PRECOMP_STATES_CAT);
+				pstmt.setInt(1, cat);
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				row = rs.getString("state_name");
+				pri = rs.getDouble("price");
+				amID = rs.getInt("state_id");
+				
+				AnalyticsModel a = new AnalyticsModel(row,prod,pri, amID);
+				table.put(amID, a);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return table;
 	}
 	
 	public ArrayList<AnalyticsModel> getStateList(int cat) {

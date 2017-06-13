@@ -19,8 +19,7 @@
         color:purple;
     }
     </style>
-    <script type ="text/javascript" src = "/CSE135_ShoppingApp/WebContent/update_refresh.js">
-    </script>
+    <script type="text/javascript" src="./update_refresh.js"></script>
 </head>
 <body>
 	<table>
@@ -28,8 +27,9 @@
 	<!-- put the result set -->
 	</tbody>
 	</table>
+	<p id="log1"></p>
+	<p id="log"></p>
 <%
-	long startTime = System.nanoTime();
 	if(session.getAttribute("roleName") != null) {
 		String role = session.getAttribute("roleName").toString();
 		if("owner".equalsIgnoreCase(role) == true){
@@ -93,12 +93,12 @@
 				}
 				
 				//get Row Names
-				ArrayList<AnalyticsModel> rowNames;
+				LinkedHashMap<Integer, AnalyticsModel> rowNames;
 				if(session.getAttribute("rowList") != null) {
-					rowNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
+					rowNames = (LinkedHashMap<Integer, AnalyticsModel>)session.getAttribute("rowList");
 				} else {
 					System.out.println("Empty row list");
-					rowNames = new ArrayList<AnalyticsModel>();
+					rowNames = new LinkedHashMap<Integer, AnalyticsModel>();
 				}
 				
 				//get Product Names
@@ -126,15 +126,20 @@
 				%>
 				<td><button onclick="refreshTable(this);">Refresh</button></td>
 				<%
+				
+				/* Bulk of the table */
 				HashMap<Integer, Double> prodpri;
 				AnalyticsModel currRow = null;
-				String currRowPrice, rowValID, cellID;
+				String currRowPrice, rowValID, cellID, varycellID;
 				String rowVal = "(0.0)";
 				Double pri = 0.0;
 				Integer stateID, prodID;
 				
-				for(int i = 0; i < 50 && i < rowNames.size(); i++) {
-					currRow = rowNames.get(i);
+				int stateindx = 0;
+				
+				Iterator<AnalyticsModel> its = rowNames.values().iterator();
+				while (its.hasNext() && stateindx < 50) {
+					currRow = its.next();
 					rowVal = currRow.getRowName();
 					currRowPrice = "(" + currRow.getPrice() + ")";
 					rowValID = "rowtitle" + currRow.getID();
@@ -146,36 +151,39 @@
 					<tr>
 					<td style="border:1px solid black; font-weight:bold"><%=rowVal %> <p id=<%=rowValID%>><%=currRowPrice%></p></td>
 					<% 
-						for(int j = 0; j < 50 && j < prodNames.size(); j++) {
-							if(an.containsKey(stateID)) {
-								prodpri = an.get(stateID);
-								prodID = prodNames.get(j).getID();
-								cellID = cellID + "_" + prodID;
-								
-								if(prodpri.containsKey(prodID)) {
-									pri = prodpri.get(prodID);
-									%>
-									<td id=<%=cellID%> style="border:1px solid black;"><%=pri%></td>
-									<%
-								} else {
-									%>
-									<td id=<%=cellID%> style="border:1px solid black;"></td>
-									<%
-								}
+					
+					for(int j = 0; j < 50 && j < prodNames.size(); j++) {
+						if(an.containsKey(stateID)) {
+							prodpri = an.get(stateID);
+							prodID = prodNames.get(j).getID();
+							varycellID = cellID + "_" + prodID;
+							
+							if(prodpri.containsKey(prodID)) {
+								pri = prodpri.get(prodID);
+								%>
+								<td id=<%=varycellID%> style="border:1px solid black;"><%=pri%></td>
+								<%
 							} else {
 								%>
-								<td id=<%=cellID%> style="border:1px solid black;"></td>
+								<td id=<%=varycellID%> style="border:1px solid black;"></td>
 								<%
 							}
-							if((i == 49) && (j == 49 || j == prodNames.size() - 1)) {
-								%>
-								<td><button onclick="refreshTable(this);">Refresh</button></td>
-								<%
-							}
+						} else {
+							%>
+							<td id=<%=cellID%> style="border:1px solid black;"></td>
+							<%
 						}
-					%>
-					</tr>
-					<%
+						if((stateindx == 49) && (j == 49 || j == prodNames.size() - 1)) {
+							%>
+							<td><button onclick="refreshTable(this);">Refresh</button></td>
+							<%
+						}
+					}
+				%>
+				</tr>
+				<%
+					
+					stateindx++;
 				}
 			%>
 			</table>
@@ -190,9 +198,7 @@
 	else { %>
 			<h3>Please <a href = "./login.jsp">login</a> before viewing the page</h3>
 	<%}
-	    long deltaTime = System.nanoTime() - startTime;
-	    System.out.println("Time: " + (deltaTime/1000000));
 	%>
-	<script type="text/javascript" src="./update_refresh.js"></script>
+
 </body>
 </html>

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -82,14 +83,15 @@ public class SalesAnalyticsController extends HttpServlet {
 			} else {
 				cat = 0;
 			}
+			request.getSession().setAttribute("categoryFilter", cat);
 			
 			//get Table
 			tableVals = aDB.getLimitedTable(cat);
 			request.getSession().setAttribute("alist", tableVals);
 			
 			//Get row list 
-			ArrayList<AnalyticsModel> rowList = new ArrayList<AnalyticsModel>();
-			rowList = aDB.getStateList(cat);
+			LinkedHashMap<Integer, AnalyticsModel> rowList = new LinkedHashMap<Integer, AnalyticsModel>();
+			rowList = aDB.getStatePrecomp(cat);
 			request.getSession().setAttribute("rowList", rowList);
 
 			//and product list

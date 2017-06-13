@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import ucsd.shoppingApp.models.AnalyticsModel;
 import ucsd.shoppingApp.models.ProductModel;
@@ -63,6 +64,57 @@ public class ProductDAO {
 	}
 	
 	/** Project Part 3 **/
+	public LinkedHashMap<Integer, AnalyticsModel> getPrecompProdList(int cat) throws SQLException {
+		long tableTime = System.nanoTime();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		LinkedHashMap<Integer, AnalyticsModel> result = new LinkedHashMap<Integer, AnalyticsModel>();
+		
+		try {
+			if(cat == 0) {
+				pstmt = con.prepareStatement(SELECT_PRECOMP_PRODUCTS_TOP_K);
+			} else {
+				pstmt = con.prepareStatement(SELECT_PRECOMP_PRODUCTS_BY_CAT);
+				pstmt.setInt(1, cat);
+			}
+				
+			AnalyticsModel am;
+			String prod;
+			Double pri;
+			int amID;
+			
+			rs = pstmt.executeQuery();
+
+			long deltaTime = System.nanoTime() - tableTime;
+		    System.out.println("Query (" + pstmt + ") Time: " + (deltaTime/1000000));
+			
+			while (rs.next()) {
+				prod = rs.getString("product_name");
+				pri = rs.getDouble("price");
+				amID = rs.getInt("product_id");
+				
+				am = new AnalyticsModel(prod, prod, pri, amID);
+				result.put(amID, am);
+			}
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			con.rollback();
+			throw e;
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public ArrayList<AnalyticsModel> getPrecomputedProdList(int cat) throws SQLException {
 		long tableTime = System.nanoTime();
 		PreparedStatement pstmt = null;

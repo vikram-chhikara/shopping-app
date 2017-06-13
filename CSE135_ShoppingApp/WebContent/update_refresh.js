@@ -1,8 +1,6 @@
 function refreshTable(){
-	document.getElementById("log").innerHTML = "inside changeColor";
 	 var xmlHttp = new XMLHttpRequest();
 	 var url="jsonSales.jsp";
-	 url = url + "?action=color";
 	 var stateChanged = function () {
 			document.getElementById("log").innerHTML = "inside statechanged";
 			 if (xmlHttp.readyState==4) {
@@ -10,6 +8,7 @@ function refreshTable(){
 			  var jsonStr = xmlHttp.responseText;
 			  var result = JSON.parse(jsonStr);
 			  console.log(result);
+			  document.getElementById("log").innerHTML = result;
 			  showDelta(result);
 			 }
 		}
@@ -20,31 +19,51 @@ function refreshTable(){
 
 
 function showDelta(obj) {
+	document.getElementById("log").innerHTML = "showDelta";
 	var i;
 
     var arr = obj.updates;
     var row ="";
-    //add new top50
-    for(var newTop in arr.newTop50){
-    	row = row + "<tr><td id= Prod_ID_"+newTop[1]+"><label>"+"<td id=Prod_Price"+ newTop[2] +"><label>"+ "</tr>";
-    }
-    console.log(row);
-    document.getElementById("tablebody").innerHTML = row;
+    var mostChange = 50;
     
-    //Update columns
-    for (var prodMap in arr.updatedProducts){
-      var x = document.getElementById("prodtitle" + prodMap[1]);
-      x.innerHTML = "<label>"+ prodMap[2] +"</label>";
-      x.style.backgroundColor = "red"
+    var stateTitleID = "rowtitle";
+    var prodTitleID = "prodtitle";
+    var cellID = "cell";
+    
+    var id, idc, newval, colid;
+    
+    document.getElementById("log1").innerHTML = "Entering sModel";
+    
+    parr = obj.purple
+    document.getElementById("log").innerHTML = parr.length;
+    //for each state, loop through purple prodtitle and cell elems changing it purple
+    for(i = 0; i < parr.length; i++) {
+    	id = parr[i].id;
+    	console.log(id);
+    	
+    	colid = prodTitleID + id;
+
+    	console.log(colid);
+    	var ref = document.getElementById(id);
+    	ref.style.color = "purple";
+    	
+    	for(var s = 1; s < 57; s++) {
+    		colid = cellID + s + "_" + id;
+    		ref = document.getElementById(colid);
+        	ref.style.color = "purple";
+    	}
     }
-    //Update rows
-    for (var stateMap in arr.updatedStates){
-      var x = document.getElementById("rowtitle" + stateMap[1]);
-      x.innerHTML = "<label>"+ stateMap[2] +"</label>";
-      x.style.backgroundColor = "red"
+    
+    rarr = obj.red
+    document.getElementById("log1").innerHTML = rarr.length;
+    for(i = 0; i < rarr.length; i++) {
+    	id = rarr[i].id;
+    	newval = rarr[i].value;
+    	
+    	console.log(id);
+    	
+    	var ref = document.getElementById(id);
+    	ref.innerHTML = newval;
+    	ref.style.color = "red";
     }
-   
-
-
-
 }

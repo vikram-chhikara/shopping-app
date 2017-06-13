@@ -58,7 +58,7 @@ public class AnalyticsModel {
 		//Checks if object is correct
 		if(o instanceof AnalyticsModel) {
 			//Check if values are correct
-			if(this.getRowName().equals(((AnalyticsModel)o).getRowName()) && this.getProduct().equals(((AnalyticsModel)o).getProduct()))
+			if(this.getID() == ((AnalyticsModel)o).getID())
 				return true;
 		}
 		

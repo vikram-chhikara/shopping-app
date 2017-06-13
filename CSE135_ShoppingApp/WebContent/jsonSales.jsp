@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <% response.setContentType("application/json") ; %>
-<%@page contentType="text/html; charset=UTF-8"%>
 <%@page import="org.json.*, java.lang.*"%>
 <%@page import="ucsd.shoppingApp.models.*, java.util.*" %>
 <%@page import="ucsd.shoppingApp.ConnectionManager"%>
@@ -17,75 +16,101 @@ SalesDAO aDB;
 Connection con = ConnectionManager.getConnection();
 aDB = new SalesDAO(con);
 
-sales = aDB.getLogTable(1);
-	
-System.out.print(request.getParameter("action").toString());
+sales = aDB.getLogTable(Integer.parseInt(session.getAttribute("login_id").toString()));
 
 ArrayList<AnalyticsModel> prodNames;
 prodNames = (ArrayList<AnalyticsModel>)session.getAttribute("prodList");
 
-ArrayList<AnalyticsModel> stateNames;
-stateNames = (ArrayList<AnalyticsModel>)session.getAttribute("rowList");
+LinkedHashMap<Integer, AnalyticsModel> stateNames;
+stateNames = (LinkedHashMap<Integer, AnalyticsModel>)session.getAttribute("rowList");
 
-HashMap<String, Double> col_update;
-HashMap<String, Double> row_update;
-HashMap<String,Double> newtop50;
+HashMap<Integer, HashMap<Integer, Double>> cellMap = (HashMap<Integer, HashMap<Integer, Double>>)session.getAttribute("alist");
 
-double pr_price=0;
-double st_price=0;
+int currFilter = Integer.parseInt(session.getAttribute("categoryFilter").toString());
 
+double pr_price=0, st_price=0, cell_price = 0;
+
+int idxp = 0, idxs = 0;
+int minimumidx = 49;
+
+String ptitle = "prodtitle";
+String stitle = "rowtitle";
+String celltitle = "cell";
 
 // put the results in Json object
 JSONObject jObject = new JSONObject();
 try
 {
+	System.out.println("Making JSON");
     JSONArray jArray = new JSONArray();
+    
+    AnalyticsModel testM;
+    
+    //Determine changes in product values and totals
+    JSONArray jArrayP = new JSONArray();	//Make purple
+    JSONArray jArrayR = new JSONArray();	//Make red
     for (SaleModel c : sales)
     {
-    	String prID= Integer.toString(c.getProdID());
-    	String stateID= Integer.toString(c.getStateID());
+    	int prID = c.getProdID();
+    	int stateID = c.getStateID();
+    	double addpri = c.getPrice();
+    	int catID = c.getCategoryID();
+    	
+    	testM = new AnalyticsModel("", "", addpri, prID);
+    	
+    	if(prodNames.contains(testM) && (currFilter == 0 || currFilter == catID)) {	//Should always find it, but sanity check
+    		
+    		//state header column
+    		if(stateNames.containsKey(stateID)) {
+    			st_price = stateNames.get(stateID).getPrice() + addpri;
+    			
+    			stateNames.get(stateID).setPrice(st_price);
+    			
+    			JSONObject sJSON = new JSONObject();
+		        sJSON.put("id", stitle + stateID);
+		        sJSON.put("value", st_price);
+		        jArrayR.put(sJSON);
+    		}
+    		
+    		idxp = prodNames.indexOf(testM);
+    		pr_price = prodNames.get(idxp).getPrice() + addpri;
+    		
+    		//product header row
+    		if(idxp <= minimumidx) {
+    			prodNames.get(idxp).setPrice(pr_price);
+    			
+		    	JSONObject pJSON = new JSONObject();
+		        pJSON.put("id", ptitle + prID);
+		        pJSON.put("value", pr_price);
+		        	
+		        jArrayR.put(pJSON);
+    		} else if(pr_price > prodNames.get(minimumidx).getPrice()) {
+    			JSONObject pJSON = new JSONObject();
+		        pJSON.put("id", prodNames.get(minimumidx).getID());
+		        	
+		        jArrayP.put(pJSON);
+		        minimumidx--;
+    		}
 
-    	//loop over product sales arraylist
-    	for(int i=0; i < prodNames.size(); i++){
-    		AnalyticsModel prMod = prodNames.get(i);
-    		if(Integer.toString(prMod.getID() )== prID){//red color
-    			pr_price = prMod.getPrice() + c.getPrice();
-    			if(i <50) col_update.put(prID, pr_price) ;
-    			else{//purple column
-    				if(pr_price > (prodNames.get(49).getPrice())){
-    					newtop50.put(Integer.toString(prMod.getID()),pr_price);
-    				}
+    		//Cell
+    		if(cellMap.containsKey(stateID)) {
+    			if(cellMap.get(stateID).containsKey(prID)) {
+		    		cell_price = cellMap.get(stateID).get(prID) + addpri;
+		    		JSONObject cJSON = new JSONObject();
+			        cJSON.put("id", celltitle + stateID + "_" + prID);
+			        cJSON.put("value", cell_price);
+			        	
+			        jArrayR.put(cJSON);
     			}
     		}
-    		pr_price=0;
     	}
-    	//loop over states arraylist
-    	for(int i=0; i < stateNames.size(); i++){
-    		AnalyticsModel stateMod = stateNames.get(i);
-    		if(Integer.toString(stateMod.getID() )== stateID){//red color
-    			st_price = stateMod.getPrice() + c.getPrice();
-    		}
-    		row_update.put(stateID,st_price);
-    		
-    	}
-    	
-/*          JSONObject cJSON = new JSONObject();
-         cJSON.put("prodid", c.getProdID());
-         cJSON.put("stateId", c.getStateID());
-         cJSON.put("price", c.getPrice());
-         jArray.put(cJSON); */
-
     }
-    JSONObject cJSON = new JSONObject();
-    cJSON.put("updatedProducts", col_update);
-    cJSON.put("updatedStates", row_update);
-    cJSON.put("newTop50", newtop50);
-    jArray.put(cJSON);
+    jObject.put("purple", jArrayP);
+    jObject.put("red", jArrayR);
+    System.out.println("Finished with JSON");
     
-    jObject.put("updates", jArray);
-
 } catch (Exception jse) {
     jse.printStackTrace();
 }
 response.getWriter().print(jObject);
- %>
+%>

@@ -17,6 +17,14 @@ public class SaleModel {
 		this.price = pri;
 		this.time = t;
 	}
+	
+	public SaleModel(int prod, int state, int cat, double pri) {
+		this.prodID = prod;
+		this.stateID = state;
+		this.categoryID = cat;
+		this.price = pri;
+		this.time = null;
+	}
 
 	public int getProdID() {
 		return prodID;
