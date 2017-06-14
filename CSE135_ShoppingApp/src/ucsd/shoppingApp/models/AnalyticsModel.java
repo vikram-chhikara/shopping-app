@@ -65,3 +65,4 @@ public class AnalyticsModel {
 		return false;
 	}
 }
+

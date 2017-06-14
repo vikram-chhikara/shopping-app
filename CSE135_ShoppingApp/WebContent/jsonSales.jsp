@@ -108,24 +108,25 @@ try
 				        jArrayRC.put(cJSON);
 	    			}
 	    		}
-    		} else if(pr_price > minP){
+    		} else if(idxp > minimumidx && pr_price > minP){
     			pr_price = prodNames.get(idxp).getPrice() + addpri;
 
     			prodNames.get(idxp).setPrice(pr_price);
-    			outsider.add(pr_price);
     		}
     	}
     }
     
   	//Compare price to current top list. If so, add that listed number to purple
+  	for(int i = 50; i < prodNames.size(); i++) {
+  		outsider.add(prodNames.get(i).getPrice());
+  	}
+  	
   	Collections.sort(outsider);
-  	ArrayList<Double> sortedO = oldProd;
+  	ArrayList<Double> sortedO = new ArrayList<Double>(oldProd);
   	Collections.sort(sortedO);
   	
   	//outsider = 8, 7, 6, 5 price
   	//oldProd = 3, 4, 5, 6, 6 price
-  	
-  	System.out.println("outsider comparison");
   	
   	for(int i = outsider.size() - 1, min = 0; i >= 0 && min < oldProd.size(); i--) {
   		Double check = outsider.get(i);
@@ -134,10 +135,11 @@ try
   		if(check > smin) {
 	  		JSONObject pJSON = new JSONObject();
 	  		int idxof = oldProd.indexOf(smin);
+	  		
 	  	    pJSON.put("id", prodNames.get(idxof).getID());
 	  	    
 	  	    jArrayP.put(pJSON);
-	  	    System.out.println("add to purple column " + prodNames.get(idxof).getID());
+	  	    System.out.println("add to purple column prod id " + prodNames.get(idxof).getID());
 	  	    min++;
   		} else {
   			break;

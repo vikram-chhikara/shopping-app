@@ -44,6 +44,9 @@ function showDelta(obj) {
     	for(var s = 1; s < 57; s++) {
     		colid = cellID + s + "_" + id;
     		ref = document.getElementById(colid);
+    		
+    		console.log(colid);
+    		
     		if(ref != null)
     			ref.style.color = "purple";
     	}
