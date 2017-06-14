@@ -100,6 +100,7 @@ try
 	    		if(cellMap.containsKey(stateID)) {
 	    			if(cellMap.get(stateID).containsKey(prID)) {
 			    		cell_price = cellMap.get(stateID).get(prID) + addpri;
+			    		
 			    		JSONObject cJSON = new JSONObject();
 				        cJSON.put("id", celltitle + stateID + "_" + prID);
 				        cJSON.put("value", cell_price);
@@ -109,6 +110,7 @@ try
 	    		}
     		} else if(pr_price > minP){
     			pr_price = prodNames.get(idxp).getPrice() + addpri;
+
     			prodNames.get(idxp).setPrice(pr_price);
     			outsider.add(pr_price);
     		}
@@ -123,11 +125,11 @@ try
   	//outsider = 8, 7, 6, 5 price
   	//oldProd = 3, 4, 5, 6, 6 price
   	
-  	for(int i = outsider.size() - 1, min = 0; i >= 0 && min < oldProd.size(); i++) {
+  	System.out.println("outsider comparison");
+  	
+  	for(int i = outsider.size() - 1, min = 0; i >= 0 && min < oldProd.size(); i--) {
   		Double check = outsider.get(i);
   		Double smin = sortedO.get(min);
-  		
-  		System.out.println("outsider " + check + " vs " + "sortedprod " + smin);
   		
   		if(check > smin) {
 	  		JSONObject pJSON = new JSONObject();

@@ -9,40 +9,18 @@ CREATE TABLE logTest(
 );
 SELECT * FROM logTest;
 
-WITH tot_table AS (SELECT logTest.state_id, logTest.prod_id, logTest.category_id, 
-	SUM(logTest.price) as price FROM logTest, logOwner 
-	WHERE logTest.bought_time > logOwner.last_refresh AND logOwner.user_id = 101 
-	GROUP BY state_id, prod_id, logTest.category_id ORDER BY price),
-state_pri AS (SELECT state_id, SUM(price) AS price FROM tot_table GROUP BY state_id),
-prod_pri AS (SELECT prod_id, SUM(price) AS price FROM tot_table GROUP BY prod_id)
-SELECT tt.state_id, tt.prod_id, tt.category_id, tt.price, sp.price AS state_sum, pp.price AS prod_sum 
-	from state_pri sp CROSS JOIN prod_pri pp 
-	LEFT OUTER JOIN tot_table tt 
-	ON ( pp.prod_id = tt.prod_id and sp.state_id = tt.state_id)
-
-DROP TABLE logOwner;
+DROP TABLE IF EXISTS logOwner CASCADE;
 CREATE TABLE logOwner(
     user_id INTEGER REFERENCES person(id),
     last_refresh TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 INSERT INTO logOwner(SELECT id, (now() AT TIME ZONE 'UTC') as time FROM person);
+
+CREATE INDEX logUser ON logOwner(user_id);
+
 SELECT * FROM logOwner;
 
 DROP FUNCTION logIt() CASCADE;
-
-/* Trigger and log table */
-CREATE FUNCTION logIt() RETURNS trigger AS $logIt$
-BEGIN
--- Check insertion/update made purchase true --
-IF (SELECT is_purchased FROM shopping_cart WHERE id = NEW.cart_id) IS false THEN 
-	RETURN null;
-END IF;
-INSERT INTO logTest(prod_id, state_id, category_id, price, bought_time) VALUES 
-	(NEW.product_id, (SELECT DISTINCT state_id FROM person p, shopping_cart sc
-                      WHERE sc.person_id = p.id AND sc.id = NEW.cart_id),(SELECT p.category_id FROM product p WHERE p.id = NEW.product_id) , NEW.price * NEW.quantity, (now() AT TIME ZONE 'UTC'));
-RETURN NULL;
-END;
-$logIt$ LANGUAGE plpgsql;
 
 /* Trigger and log table */
 CREATE FUNCTION logIt() RETURNS trigger AS $logIt$
@@ -56,7 +34,7 @@ IF (SELECT EXISTS (SELECT 1 FROM logTest WHERE prod_id = NEW.product_id AND stat
                    (SELECT DISTINCT state_id FROM person p, shopping_cart sc
     WHERE sc.person_id = p.id AND sc.id = NEW.cart_id)))
 THEN
-	UPDATE logTest SET price = price + NEW.price, bought_time = (now() AT TIME ZONE 'UTC') 
+	UPDATE logTest SET price = price + (NEW.price*NEW.quantity), bought_time = (now() AT TIME ZONE 'UTC') 
     WHERE prod_id = NEW.product_id AND state_id = (SELECT DISTINCT state_id FROM person p, shopping_cart sc
     WHERE sc.person_id = p.id AND sc.id = NEW.cart_id);
 ELSE 
@@ -115,8 +93,3 @@ FROM (SELECT prod_id, state_id, SUM(price) AS price FROM logTest GROUP BY prod_i
 WHERE States_Products_Precomputed.product_id = lt.prod_id
 AND States_Products_Precomputed.state_id = lt.state_id
 AND States_Products_Precomputed.time < lt1.bought_time;
-
-
-
-
-DELETE FROM logTest;

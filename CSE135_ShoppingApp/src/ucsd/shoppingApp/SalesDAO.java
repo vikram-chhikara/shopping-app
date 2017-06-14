@@ -97,7 +97,7 @@ public class SalesDAO {
 			+ "prod_pri AS (SELECT prod_id, SUM(price) AS price FROM tot_table GROUP BY prod_id) "
 			+ "SELECT tt.state_id, tt.prod_id, tt.category_id, tt.price, sp.price AS state_sum, pp.price AS prod_sum "
 			+ "from state_pri sp CROSS JOIN prod_pri pp "
-			+ "LEFT OUTER JOIN tot_table tt ON ( pp.prod_id = tt.prod_id and sp.state_id = tt.state_id) ";
+			+ "JOIN tot_table tt ON ( pp.prod_id = tt.prod_id and sp.state_id = tt.state_id) ";
 	
 	/* Update Precomputed Tables from the Log Table */
 	private static String STATE_PRECOMP_UPDATE = "UPDATE State_Precomputed "
